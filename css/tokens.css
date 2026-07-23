@@ -1,0 +1,130 @@
+/*
+  Design tokens: one custom-property layer, themed via prefers-color-scheme
+  and prefers-contrast / forced-colors media queries (no JS theme toggle).
+
+  Brand palette (fixed, given): sage, terracotta, cream, forest.
+  Everything else (neutrals, two extra chart-series hues, semantic aliases)
+  is derived from those four and documented inline.
+*/
+
+:root {
+  /* ---- Brand palette (fixed) ---- */
+  --color-sage: #9c9f84;
+  --color-terracotta: #a97d5d;
+  --color-cream: #f7dcb4;
+  --color-forest: #5c755e;
+
+  /* ---- Extra hues, added only because 5 chart series need distinct,
+     non-adjacent hues and the brand palette has two greens (sage/forest)
+     that sit too close together for series 3+4. Named for what they add,
+     not for looks. ---- */
+  --color-slate-blue: #5d7a99; /* water-coded, for the Water Damage series */
+  --color-plum: #8b5d73; /* fifth series hue, kept out of the green family */
+
+  /* ---- Neutrals, derived for text/background/border use the four brand
+     colors can't safely cover (none of them work as body text or as a
+     background at AA contrast in both themes). ---- */
+  --color-ink: #211e1a; /* near-black, warm-neutral body text (light theme) */
+  --color-ink-muted: #4b4740;
+  --color-paper: #fbf8f1; /* near-white, warm-neutral background (light theme) */
+  --color-paper-raised: #ffffff;
+  --color-border-light: #d8d2c4;
+
+  --color-snow: #f3efe6; /* near-white body text (dark theme) */
+  --color-snow-muted: #c9c3b4;
+  --color-coal: #16181a; /* near-black background (dark theme) */
+  --color-coal-raised: #1f221d;
+  --color-border-dark: #3a3d34;
+
+  /* Lightened forest for dark-theme links/focus: raw --color-forest doesn't
+     clear 4.5:1 against --color-coal, this does. */
+  --color-forest-tint: #a9c7ac;
+  /* Deepened terracotta for light-theme visited-link use, distinguishable
+     from --color-link without leaving the brand family. */
+  --color-terracotta-shade: #8a6349;
+}
+
+/* ---------- Light theme (default) ---------- */
+:root {
+  --bg: var(--color-paper);
+  --surface: var(--color-paper-raised);
+  --text: var(--color-ink);
+  --text-muted: var(--color-ink-muted);
+  --border: var(--color-border-light);
+  --link: var(--color-forest);
+  --link-visited: var(--color-terracotta-shade);
+  --focus-ring: var(--color-forest);
+  --accent: var(--color-terracotta);
+  --accent-contrast: var(--color-ink);
+
+  /* Chart series tokens: color is never the only encoding (see
+     patterns/color-encoding) — each series also gets an SVG pattern fill,
+     wired per-demo, not abstracted into svg-helpers.js. */
+  --series-1: var(--color-terracotta); /* Auto Collision */
+  --series-2: var(--color-forest); /* Weather & Storm Damage */
+  --series-3: var(--color-slate-blue); /* Water Damage (Non-Weather) */
+  --series-4: var(--color-sage); /* Liability Claims */
+  --series-5: var(--color-plum); /* Wildlife & Unusual Incidents */
+  --series-stroke: var(--color-paper); /* segment separators, light theme */
+}
+
+/* ---------- Dark theme ---------- */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: var(--color-coal);
+    --surface: var(--color-coal-raised);
+    --text: var(--color-snow);
+    --text-muted: var(--color-snow-muted);
+    --border: var(--color-border-dark);
+    --link: var(--color-forest-tint);
+    --link-visited: var(--color-cream);
+    --focus-ring: var(--color-cream);
+    --accent: var(--color-cream);
+    --accent-contrast: var(--color-coal);
+
+    --series-1: var(--color-terracotta);
+    --series-2: var(--color-forest-tint);
+    --series-3: var(--color-slate-blue);
+    --series-4: var(--color-sage);
+    --series-5: var(--color-plum);
+    --series-stroke: var(--color-coal);
+  }
+}
+
+/* ---------- High contrast (prefers-contrast: more) ----------
+   Widen the gaps: pure black/white text+background, stronger borders.
+   Chart series colors are left as-is here (patterns already carry the
+   encoding); only structural chrome gets stronger. */
+@media (prefers-contrast: more) {
+  :root {
+    --bg: #ffffff;
+    --surface: #ffffff;
+    --text: #000000;
+    --text-muted: #1a1a1a;
+    --border: #000000;
+    --link: #1a3d1c;
+    --focus-ring: #000000;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #000000;
+      --surface: #000000;
+      --text: #ffffff;
+      --text-muted: #e6e6e6;
+      --border: #ffffff;
+      --link: var(--color-cream);
+      --focus-ring: #ffffff;
+    }
+  }
+}
+
+/* ---------- Windows High Contrast / forced-colors ----------
+   Let the OS palette win for structural chrome; we only need to make sure
+   focus stays visible (outline survives forced-colors, box-shadow doesn't)
+   and that nothing depends on a custom color to convey state. */
+@media (forced-colors: active) {
+  :root {
+    --focus-ring: Highlight;
+  }
+}

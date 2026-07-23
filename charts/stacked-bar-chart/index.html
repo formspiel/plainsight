@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Stacked Bar Chart — Plainsight</title>
+  <meta name="description" content="Expected keyboard operation and screen reader behavior for stacked bar charts." />
+  <link rel="stylesheet" href="../../css/tokens.css" />
+  <link rel="stylesheet" href="../../css/base.css" />
+  <link rel="stylesheet" href="../../css/chart.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <div class="site-header__inner">
+      <p class="site-title"><a href="../../index.html">Plainsight</a></p>
+      <nav class="site-nav" aria-label="Primary">
+        <ul>
+          <li><a href="../../index.html">Home</a></li>
+          <li><a href="../../getting-started/index.html">Getting Started</a></li>
+          <li>
+            <details>
+              <summary>Chart Types</summary>
+              <ul>
+                <li><a href="../../charts/stacked-bar-chart/index.html" aria-current="page">Stacked Bar Chart</a></li>
+                <li><a href="../../charts/double-bar-chart/index.html">Double Bar Graph</a></li>
+                <li><a href="../../charts/donut-pie-chart/index.html">Donut / Pie Chart</a></li>
+                <li><a href="../../charts/multi-series-line-chart/index.html">Multi-Series Line Chart</a></li>
+                <li><a href="../../charts/likert-scale-chart/index.html">Likert Scale Chart</a></li>
+              </ul>
+            </details>
+          </li>
+          <li>
+            <details>
+              <summary>Cross-Cutting Patterns</summary>
+              <ul>
+                <li><a href="../../patterns/color-encoding/index.html">Color &amp; Non-Color Encoding</a></li>
+                <li><a href="../../patterns/tooltips/index.html">Tooltips</a></li>
+                <li><a href="../../patterns/live-data/index.html">Live/Updating Data</a></li>
+                <li><a href="../../patterns/legends-as-filters/index.html">Legends as Filters</a></li>
+                <li><a href="../../patterns/zoom-pan-drilldown/index.html">Zoom/Pan/Drill-Down</a></li>
+                <li><a href="../../patterns/navigation-at-scale/index.html">Navigation at Scale</a></li>
+                <li><a href="../../patterns/reflow-zoom/index.html">Reflow/Zoom at Small Viewports</a></li>
+                <li><a href="../../patterns/canvas-vs-svg/index.html">Canvas vs SVG</a></li>
+                <li><a href="../../patterns/motion/index.html">Motion</a></li>
+              </ul>
+            </details>
+          </li>
+          <li><a href="../../audit-checklist/index.html">Audit Checklist</a></li>
+          <li><a href="../../verified-against/index.html">Verified Against</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" class="page">
+    <p class="breadcrumb"><a href="../../index.html">Home</a> / <a href="../../index.html#chart-types">Chart Types</a> / Stacked Bar Chart</p>
+
+    <h1>Stacked Bar Chart</h1>
+    <p class="page-intro">
+      A vertical bar per category, subdivided into segments that sum to the bar's total.
+      Good for showing both a whole (the total) and its composition (the parts) across
+      many categories at once.
+    </p>
+
+    <div class="callout">
+      <p>
+        This page is the template the rest of Plainsight's chart pages follow. If
+        you're new here, start with <a href="../../getting-started/index.html">Getting
+        Started</a> — and remember the core thesis: a data table fallback is a genuine
+        parallel option, not a substitute for making the chart itself the accessible
+        experience.
+      </p>
+    </div>
+
+    <h2>When to use it</h2>
+    <p>
+      Use a stacked bar chart when readers need both the total per category and a sense
+      of how that total breaks down into parts — for example, total insurance claims per
+      month, and which claim categories drove that total.
+    </p>
+    <p><strong>It's the wrong choice when:</strong></p>
+    <ul>
+      <li>
+        Readers mainly need to compare one segment's value <em>across</em> categories
+        (e.g. "was Weather Damage higher in March or September?"). Stacked segments
+        don't share a common baseline except the bottom-most one, so that comparison is
+        genuinely hard to make visually — a grouped/clustered bar chart serves it better.
+      </li>
+      <li>
+        There are more than 5–6 segments. Beyond that, both the visual legend and the
+        segment-level keyboard/SR navigation described below become a slog — consider
+        splitting into small multiples instead.
+      </li>
+      <li>
+        Only two categories are being compared. A simpler diverging bar (see the
+        upcoming Double Bar Graph page) usually communicates that more directly.
+      </li>
+    </ul>
+
+    <h2>Interaction complexity tier</h2>
+    <p>
+      <strong>Exploratory.</strong> A reader can navigate to and get the exact value of
+      every individual segment, not just an overall chart summary. With 30 months ×
+      5 categories (150 data points) behind this chart, a single <code>role="img"</code>
+      summary would strand keyboard and screen reader users well below what a sighted
+      user gets by looking at the chart — so this demo implements full point-by-point
+      navigation. (A "Summary" tier — one accessible name describing the whole chart,
+      no per-point navigation — is legitimate for genuinely simple charts; it isn't
+      for this one.)
+    </p>
+
+    <h2>Expected accessibility tree</h2>
+    <p>
+      The visual chart is an <code>&lt;svg aria-hidden="true"&gt;</code> — purely
+      decorative. All accessibility semantics live in a parallel layer of real,
+      invisibly-styled <code>&lt;button&gt;</code> elements positioned exactly over each
+      bar and each segment. This sidesteps inconsistent AT support for ARIA on SVG
+      shapes (see <a href="../../patterns/canvas-vs-svg/index.html">Canvas vs SVG</a>)
+      and means screen readers announce each stop automatically on focus — no custom
+      <code>aria-live</code> wiring needed for basic navigation.
+    </p>
+    <div class="data-table-wrapper">
+      <table>
+        <caption class="visually-hidden">Expected accessibility tree for the stacked bar chart</caption>
+        <thead>
+          <tr>
+            <th scope="col">Element</th>
+            <th scope="col">Role</th>
+            <th scope="col">Accessible name source</th>
+            <th scope="col">Description source</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Chart container</td>
+            <td><code>group</code></td>
+            <td><code>aria-label</code>: chart title + date range</td>
+            <td><code>aria-describedby</code>: one-time keyboard instructions (visually hidden)</td>
+          </tr>
+          <tr>
+            <td>Bar summary stop (one per month)</td>
+            <td><code>button</code> (native)</td>
+            <td>Text content: "January 2023: 58 claims total."</td>
+            <td>None — name is self-contained</td>
+          </tr>
+          <tr>
+            <td>Segment stop (one per category per month)</td>
+            <td><code>button</code> (native)</td>
+            <td>Text content: "January 2023, Auto Collision: 24 claims, 41% of this month's total."</td>
+            <td>None — name is self-contained</td>
+          </tr>
+          <tr>
+            <td>Legend</td>
+            <td>Plain list (<code>ul</code>/<code>li</code>)</td>
+            <td>n/a — static text + swatch, not interactive</td>
+            <td>n/a</td>
+          </tr>
+          <tr>
+            <td>Data table fallback</td>
+            <td><code>table</code>, sortable column headers as <code>button</code> inside <code>th</code></td>
+            <td>Column <code>&lt;th&gt;</code> text; row <code>&lt;th scope="row"&gt;</code> = month</td>
+            <td><code>aria-sort</code> on each sortable <code>&lt;th&gt;</code></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>Keyboard pattern</h2>
+    <p>
+      The whole chart is a single Tab stop. Arrow keys move a roving-tabindex cursor
+      within it — this is what keeps 150 data points from becoming 150 Tab stops (see
+      <a href="../../patterns/navigation-at-scale/index.html">Navigation at scale</a>).
+      "Down" and "Up" move vertically through the visual stack, matching what a sighted
+      user's eye would do.
+    </p>
+    <div class="data-table-wrapper">
+      <table>
+        <caption class="visually-hidden">Keyboard pattern for the stacked bar chart</caption>
+        <thead>
+          <tr>
+            <th scope="col">Key</th>
+            <th scope="col">Expected behavior</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row">Tab</th><td>Moves focus into the chart, landing on whichever stop was last focused (the first month's bar summary, initially). Moves focus out entirely on the way back — this is one Tab stop, not many.</td></tr>
+          <tr><th scope="row">Shift+Tab</th><td>Moves focus out of the chart, backward.</td></tr>
+          <tr><th scope="row">Right Arrow</th><td>Moves to the next month, staying at the same level (bar summary stays on bar summary; a given category stays on that category).</td></tr>
+          <tr><th scope="row">Left Arrow</th><td>Moves to the previous month, same level.</td></tr>
+          <tr><th scope="row">Down Arrow</th><td>From the bar summary: enters the stack at its topmost segment. From a segment: moves down, toward the base.</td></tr>
+          <tr><th scope="row">Up Arrow</th><td>From a segment: moves up, toward the top of the stack. From the topmost segment: exits back to the bar summary.</td></tr>
+          <tr><th scope="row">Home</th><td>Jumps to the first month (January 2023), same level.</td></tr>
+          <tr><th scope="row">End</th><td>Jumps to the last month (June 2025), same level.</td></tr>
+          <tr><th scope="row">Escape</th><td>From a segment, jumps directly back to that month's bar summary.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>Screen reader behavior</h2>
+    <p>
+      Because every navigable stop is a real, focusable <code>&lt;button&gt;</code>,
+      moving focus is enough to trigger a standard AT announcement — role ("button"),
+      name (the full sentence above), and position isn't separately announced by us
+      since we don't use a grid/listbox role that implies set-size/position-in-set.
+      The one-time instructions ("Use Left and Right arrow keys to move between
+      months...") are attached to the chart container via <code>aria-describedby</code>
+      and are announced once, on first entry, not repeated per stop.
+    </p>
+
+    <h3>Verified SR × browser matrix</h3>
+    <p>
+      This page is new — none of the following has been verified against real
+      assistive technology yet. Marked honestly rather than omitted, per the site's own
+      standard (see <a href="../../verified-against/index.html">Verified Against</a>).
+    </p>
+    <div class="data-table-wrapper">
+      <table>
+        <caption class="visually-hidden">Verified screen reader and browser combinations for the stacked bar chart</caption>
+        <thead>
+          <tr>
+            <th scope="col">Screen reader</th>
+            <th scope="col">Browser</th>
+            <th scope="col">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row">JAWS</th><td>Edge</td><td>Not yet verified</td></tr>
+          <tr><th scope="row">NVDA</th><td>Edge</td><td>Not yet verified</td></tr>
+          <tr><th scope="row">NVDA</th><td>Firefox</td><td>Not tested in our environment (Firefox unavailable) — not yet verified elsewhere either</td></tr>
+          <tr><th scope="row">VoiceOver</th><td>macOS Safari</td><td>Not yet verified</td></tr>
+          <tr><th scope="row">VoiceOver</th><td>iOS Safari</td><td>Not yet verified</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>Live demo</h2>
+    <p>
+      30 months of fictional insurance claims data, by category. Tab into the chart,
+      then use the arrow keys described above.
+    </p>
+
+    <div id="stacked-bar-chart" class="chart-figure">
+      <noscript>
+        <p>
+          This chart requires JavaScript to render. In the meantime, see the
+          <a href="#stacked-bar-table">data table</a> below or
+          <a href="data.csv" download>download the CSV</a>.
+        </p>
+      </noscript>
+    </div>
+    <p id="stacked-bar-instructions" class="visually-hidden">
+      Interactive chart with 30 months of data. Use Left and Right arrow keys to move
+      between months, Down arrow to explore the categories within a month, Up arrow to
+      move back toward the month summary, Home and End to jump to the first or last
+      month.
+    </p>
+
+    <div id="stacked-bar-legend"></div>
+
+    <h2>Data table fallback</h2>
+    <p>
+      Same dataset, sortable by any column. This is a genuine parallel option for
+      readers who want exact values — not a replacement for the chart above.
+    </p>
+    <div class="chart-controls">
+      <a class="download-link" href="data.csv" download>⭳ Download CSV</a>
+    </div>
+    <div id="stacked-bar-table-wrapper" class="data-table-wrapper">
+      <table id="stacked-bar-table">
+        <caption>Monthly insurance claims by category, January 2023–June 2025</caption>
+        <thead>
+          <tr>
+            <th scope="col" data-sort-key="month" aria-sort="ascending"><button type="button">Month</button></th>
+            <th scope="col" data-sort-key="0" aria-sort="none"><button type="button">Auto Collision</button></th>
+            <th scope="col" data-sort-key="1" aria-sort="none"><button type="button">Weather &amp; Storm Damage</button></th>
+            <th scope="col" data-sort-key="2" aria-sort="none"><button type="button">Water Damage (Non-Weather)</button></th>
+            <th scope="col" data-sort-key="3" aria-sort="none"><button type="button">Liability Claims</button></th>
+            <th scope="col" data-sort-key="4" aria-sort="none"><button type="button">Wildlife &amp; Unusual Incidents</button></th>
+            <th scope="col" data-sort-key="total" aria-sort="none"><button type="button">Total</button></th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <h2>Common failure patterns seen in audits</h2>
+    <p>
+      Seeded with well-known, representative failures to start this page — not yet a
+      team-sourced catalog from real audits. Replace/extend as the team encounters real
+      examples (see CLAUDE.md's sourcing note).
+    </p>
+    <ul>
+      <li>
+        <strong>Segments distinguished by color alone</strong>, with no pattern/texture
+        and no text alternative — fails for colorblind users and anyone in
+        high-contrast/grayscale contexts. (WCAG 1.4.1 Use of Color)
+      </li>
+      <li>
+        <strong>No keyboard path to individual segment values</strong> — totals and
+        breakdowns are only revealed by a mouse-hover tooltip. (WCAG 2.1.1 Keyboard,
+        1.1.1 Non-text Content)
+      </li>
+      <li>
+        <strong>Generic or missing accessible names</strong> on bars/segments (e.g. "bar
+        14" with no data), so a screen reader user can tell something is there but not
+        what it means. (WCAG 4.1.2 Name, Role, Value; 1.1.1 Non-text Content)
+      </li>
+      <li>
+        <strong>A data table fallback exists but isn't a real equivalent</strong> —
+        missing column/row headers, not actually reachable via keyboard, or omitting
+        values the chart shows (e.g. category totals). (WCAG 1.3.1 Info and
+        Relationships)
+      </li>
+    </ul>
+
+    <h2>Mobile / touch equivalent</h2>
+    <p>
+      The hotspot buttons work as normal tap targets for sighted touch users, and are
+      real focusable elements so switch-access and other assistive input methods reach
+      them. Two honest caveats:
+    </p>
+    <ul>
+      <li>
+        <strong>Roving tabindex helps hardware-keyboard users, not swipe navigation.</strong>
+        VoiceOver (iOS) and TalkBack swipe gestures walk the accessibility tree in
+        document order regardless of <code>tabindex</code>, so a mobile screen reader
+        user swiping through this chart still encounters all 180 stops (30 months × 6
+        stops) one at a time — the scale mitigation described in the keyboard pattern
+        section doesn't carry over to touch. This is a real, unresolved cost of dense
+        charts on mobile, not something this demo papers over.
+      </li>
+      <li>
+        <strong>No distinct visual "focused/selected" state</strong> beyond the
+        browser's default focus ring, which is not generally shown for touch taps at
+        all. A sighted touch user gets little visual feedback that a bar was "selected"
+        for exploration purposes.
+      </li>
+    </ul>
+
+    <h2>Library notes</h2>
+    <p>
+      Plain links for v1 — no accessibility verdict yet (see
+      <a href="https://github.com/formspiel/plainsight/issues/1">tracking issue</a>).
+    </p>
+    <ul>
+      <li><a href="https://www.highcharts.com/">Highcharts</a></li>
+      <li><a href="https://www.chartjs.org/">Chart.js</a></li>
+      <li><a href="https://d3js.org/">D3</a></li>
+      <li><a href="https://echarts.apache.org/">ECharts</a></li>
+      <li><a href="https://recharts.org/">Recharts</a></li>
+      <li><a href="https://nivo.rocks/">Nivo</a></li>
+    </ul>
+  </main>
+
+  <footer class="site-footer">
+    <p>Plainsight — a chart accessibility pattern reference. <a href="https://github.com/formspiel/plainsight">Source on GitHub</a>.</p>
+  </footer>
+
+  <script type="module" src="script.js"></script>
+</body>
+</html>

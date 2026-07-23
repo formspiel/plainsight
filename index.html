@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Plainsight — Chart Accessibility Pattern Reference</title>
+  <meta name="description" content="Library-agnostic reference for expected keyboard operation and screen reader behavior in common chart types." />
+  <link rel="stylesheet" href="css/tokens.css" />
+  <link rel="stylesheet" href="css/base.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <div class="site-header__inner">
+      <p class="site-title"><a href="index.html">Plainsight</a></p>
+      <nav class="site-nav" aria-label="Primary">
+        <ul>
+          <li><a href="index.html" aria-current="page">Home</a></li>
+          <li><a href="getting-started/index.html">Getting Started</a></li>
+          <li>
+            <details>
+              <summary>Chart Types</summary>
+              <ul>
+                <li><a href="charts/stacked-bar-chart/index.html">Stacked Bar Chart</a></li>
+                <li><a href="charts/double-bar-chart/index.html">Double Bar Graph</a></li>
+                <li><a href="charts/donut-pie-chart/index.html">Donut / Pie Chart</a></li>
+                <li><a href="charts/multi-series-line-chart/index.html">Multi-Series Line Chart</a></li>
+                <li><a href="charts/likert-scale-chart/index.html">Likert Scale Chart</a></li>
+              </ul>
+            </details>
+          </li>
+          <li>
+            <details>
+              <summary>Cross-Cutting Patterns</summary>
+              <ul>
+                <li><a href="patterns/color-encoding/index.html">Color &amp; Non-Color Encoding</a></li>
+                <li><a href="patterns/tooltips/index.html">Tooltips</a></li>
+                <li><a href="patterns/live-data/index.html">Live/Updating Data</a></li>
+                <li><a href="patterns/legends-as-filters/index.html">Legends as Filters</a></li>
+                <li><a href="patterns/zoom-pan-drilldown/index.html">Zoom/Pan/Drill-Down</a></li>
+                <li><a href="patterns/navigation-at-scale/index.html">Navigation at Scale</a></li>
+                <li><a href="patterns/reflow-zoom/index.html">Reflow/Zoom at Small Viewports</a></li>
+                <li><a href="patterns/canvas-vs-svg/index.html">Canvas vs SVG</a></li>
+                <li><a href="patterns/motion/index.html">Motion</a></li>
+              </ul>
+            </details>
+          </li>
+          <li><a href="audit-checklist/index.html">Audit Checklist</a></li>
+          <li><a href="verified-against/index.html">Verified Against</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" class="page">
+    <h1>Plainsight</h1>
+    <p class="page-intro">
+      A library-agnostic reference documenting expected keyboard operation and screen
+      reader/assistive-technology behavior for common chart types. A sibling project to
+      <a href="https://formspiel.github.io/native-form-elements/">native-form-elements</a>,
+      same spirit applied to data visualization instead of form controls.
+    </p>
+
+    <section aria-labelledby="why-not-a-table-heading">
+      <h2 id="why-not-a-table-heading">Why not just a data table?</h2>
+      <p>
+        A chart's entire value proposition is letting a sighted user spot a trend, an
+        outlier, a comparison, in under a second — a perceptual shortcut a table doesn't
+        give you. If the "accessible version" of a chart is just a data table fallback,
+        assistive technology and keyboard users get a strictly worse experience: same
+        data, none of the perceptual shortcut.
+      </p>
+      <p>
+        The goal of this project is charts that <em>are</em> the accessible experience,
+        with a data table as a genuine parallel option for users who want exact values —
+        not an excuse for skipping chart accessibility. Every chart page here builds a
+        real keyboard- and screen-reader-navigable chart first; the data table sits
+        alongside it, not instead of it.
+      </p>
+    </section>
+
+    <section aria-labelledby="who-heading">
+      <h2 id="who-heading">Who this is for</h2>
+      <p>
+        Built as a checklist companion for accessibility testers auditing applications
+        containing charts — and, through them, for developers building charts and
+        designers who need to understand accessible chart design before shipping
+        inaccessible defaults. One canonical reference, shared onward as needed rather
+        than split into separate tracks per audience.
+      </p>
+    </section>
+
+    <section aria-labelledby="chart-types-heading" id="chart-types">
+      <h2 id="chart-types-heading">Chart types</h2>
+      <p>Five chart types, chosen for genuinely distinct accessibility problems rather than popularity, and ordered to build shared understanding progressively.</p>
+      <ul class="card-grid">
+        <li>
+          <a class="card" href="charts/stacked-bar-chart/index.html">
+            <span class="badge badge--done">Available</span>
+            <h3>Stacked Bar Chart</h3>
+            <p>Foundational additive-stacking pattern: totals plus composition.</p>
+          </a>
+        </li>
+        <li>
+          <a class="card" href="charts/double-bar-chart/index.html">
+            <span class="badge">Coming soon</span>
+            <h3>Double Bar Graph</h3>
+            <p>Diverging, mirrored-axis bars — values either side of a center line.</p>
+          </a>
+        </li>
+        <li>
+          <a class="card" href="charts/donut-pie-chart/index.html">
+            <span class="badge">Coming soon</span>
+            <h3>Donut / Pie Chart</h3>
+            <p>Part-to-whole, angle encoding — and when a bar chart would serve better.</p>
+          </a>
+        </li>
+        <li>
+          <a class="card" href="charts/multi-series-line-chart/index.html">
+            <span class="badge">Coming soon</span>
+            <h3>Multi-Series Line Chart</h3>
+            <p>Trend over time across multiple series; dual-axis and annotations.</p>
+          </a>
+        </li>
+        <li>
+          <a class="card" href="charts/likert-scale-chart/index.html">
+            <span class="badge">Coming soon</span>
+            <h3>Likert Scale Chart</h3>
+            <p>Diverging stacked bars, center-zero — survey/UX response data.</p>
+          </a>
+        </li>
+      </ul>
+    </section>
+
+    <section aria-labelledby="patterns-heading">
+      <h2 id="patterns-heading">Cross-cutting patterns</h2>
+      <p>Concerns that show up across multiple chart types, documented once and referenced from each relevant chart page.</p>
+      <ul class="card-grid">
+        <li><a class="card" href="patterns/color-encoding/index.html"><span class="badge">Coming soon</span><h3>Color &amp; Non-Color Encoding</h3></a></li>
+        <li><a class="card" href="patterns/tooltips/index.html"><span class="badge">Coming soon</span><h3>Tooltips</h3></a></li>
+        <li><a class="card" href="patterns/live-data/index.html"><span class="badge">Coming soon</span><h3>Live/Updating Data</h3></a></li>
+        <li><a class="card" href="patterns/legends-as-filters/index.html"><span class="badge">Coming soon</span><h3>Legends as Filters</h3></a></li>
+        <li><a class="card" href="patterns/zoom-pan-drilldown/index.html"><span class="badge">Coming soon</span><h3>Zoom/Pan/Drill-Down</h3></a></li>
+        <li><a class="card" href="patterns/navigation-at-scale/index.html"><span class="badge">Coming soon</span><h3>Navigation at Scale</h3></a></li>
+        <li><a class="card" href="patterns/reflow-zoom/index.html"><span class="badge">Coming soon</span><h3>Reflow/Zoom at Small Viewports</h3></a></li>
+        <li><a class="card" href="patterns/canvas-vs-svg/index.html"><span class="badge">Coming soon</span><h3>Canvas vs SVG</h3></a></li>
+        <li><a class="card" href="patterns/motion/index.html"><span class="badge">Coming soon</span><h3>Motion</h3></a></li>
+      </ul>
+    </section>
+
+    <section aria-labelledby="more-heading">
+      <h2 id="more-heading">More</h2>
+      <ul class="card-grid">
+        <li><a class="card" href="getting-started/index.html"><h3>Getting Started</h3><p>The canonical starting path for testers, developers, and designers.</p></a></li>
+        <li><a class="card" href="audit-checklist/index.html"><span class="badge">Coming soon</span><h3>Audit Checklist</h3><p>Condensed, copyable — derived from the chart pages.</p></a></li>
+        <li><a class="card" href="verified-against/index.html"><span class="badge">Coming soon</span><h3>Verified Against</h3><p>Screen reader × browser matrix and methodology.</p></a></li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>Plainsight — a chart accessibility pattern reference. <a href="https://github.com/formspiel/plainsight">Source on GitHub</a>.</p>
+  </footer>
+</body>
+</html>
