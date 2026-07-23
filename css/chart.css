@@ -1,0 +1,201 @@
+/* Shared styles for chart demo pages. */
+
+.chart-figure {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1000 / 520;
+  margin: 1.5rem 0;
+}
+
+.chart-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.chart-gridline {
+  stroke: var(--border);
+  stroke-width: 1;
+}
+
+.chart-axis-baseline {
+  stroke: var(--text-muted);
+  stroke-width: 1.5;
+}
+
+.chart-axis-label {
+  fill: var(--text-muted);
+  font-size: 13px;
+  font-family: system-ui, sans-serif;
+}
+
+.chart-axis-label--month {
+  font-size: 11px;
+}
+
+/* Hotspot overlay: invisible, exactly positioned buttons carrying all
+   chart a11y semantics. See script.js for why. */
+.chart-hotspots {
+  position: absolute;
+  inset: 0;
+}
+
+.hotspot {
+  position: absolute;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.hotspot:hover {
+  outline: 2px dashed var(--focus-ring);
+  outline-offset: 1px;
+}
+
+.chart-legend {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+  padding: 0;
+  margin: 1rem 0 1.5rem;
+  font-size: 0.9rem;
+}
+
+.chart-legend li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Swatch backgrounds mirror the five SVG <pattern> fills used on the chart
+   itself (diagonal / dots / crosshatch / horizontal / vertical), so the
+   legend key matches what's visually on the bars, not just their color. */
+.chart-legend__swatch {
+  display: inline-block;
+  width: 1.1rem;
+  height: 1.1rem;
+  border-radius: 3px;
+  border: 1px solid var(--border);
+  background-color: var(--swatch-color);
+  background-size: 8px 8px;
+}
+
+.chart-legend__swatch[data-pattern="1"] {
+  background-image: repeating-linear-gradient(
+    45deg,
+    rgb(0 0 0 / 0.38) 0,
+    rgb(0 0 0 / 0.38) 1.4px,
+    transparent 1.4px,
+    transparent 8px
+  );
+}
+
+.chart-legend__swatch[data-pattern="2"] {
+  background-image: radial-gradient(rgb(0 0 0 / 0.4) 1.5px, transparent 1.6px);
+}
+
+.chart-legend__swatch[data-pattern="3"] {
+  background-image: repeating-linear-gradient(
+      45deg,
+      rgb(0 0 0 / 0.32) 0,
+      rgb(0 0 0 / 0.32) 1.2px,
+      transparent 1.2px,
+      transparent 8px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      rgb(0 0 0 / 0.32) 0,
+      rgb(0 0 0 / 0.32) 1.2px,
+      transparent 1.2px,
+      transparent 8px
+    );
+}
+
+.chart-legend__swatch[data-pattern="4"] {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    rgb(0 0 0 / 0.38) 0,
+    rgb(0 0 0 / 0.38) 1.4px,
+    transparent 1.4px,
+    transparent 8px
+  );
+}
+
+.chart-legend__swatch[data-pattern="5"] {
+  background-image: repeating-linear-gradient(
+    to right,
+    rgb(0 0 0 / 0.38) 0,
+    rgb(0 0 0 / 0.38) 1.4px,
+    transparent 1.4px,
+    transparent 8px
+  );
+}
+
+/* Sortable data table header buttons */
+th[data-sort-key] {
+  padding: 0;
+}
+
+th[data-sort-key] button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  background: none;
+  border: 0;
+  font: inherit;
+  font-weight: 600;
+  color: inherit;
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+  text-align: left;
+}
+
+th[data-sort-key] button:hover {
+  text-decoration: underline;
+}
+
+th[aria-sort="ascending"] button::after {
+  content: "\25B2";
+  font-size: 0.7em;
+}
+
+th[aria-sort="descending"] button::after {
+  content: "\25BC";
+  font-size: 0.7em;
+}
+
+th[aria-sort="none"] button::after {
+  content: "\21C5";
+  font-size: 0.7em;
+  opacity: 0.5;
+}
+
+.chart-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  margin: 1rem 0;
+}
+
+.download-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 600;
+  text-decoration: none;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.5rem 0.9rem;
+  background: var(--surface);
+}
+
+.download-link:hover,
+.download-link:focus-visible {
+  border-color: var(--accent);
+}

@@ -1,0 +1,14 @@
+{
+  "name": "plainsight",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Plainsight — chart accessibility pattern reference. No build step for the site itself; these are CI-only tooling dependencies.",
+  "scripts": {
+    "pa11y": "pa11y-ci"
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1",
+    "pa11y-ci": "^3.1.0",
+    "wait-on": "^7.2.0"
+  }
+}

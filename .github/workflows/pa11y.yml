@@ -1,0 +1,60 @@
+name: Pa11y CI
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  pa11y:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install CI tooling
+        run: npm install
+
+      - name: Serve the site
+        run: npx http-server . -p 8080 --silent &
+
+      - name: Wait for the server
+        run: npx wait-on http://localhost:8080/index.html
+
+      # Errors-only by config (.pa11yci): includeWarnings/includeNotices are
+      # both off, so a passing run here means zero WCAG2AA errors, not zero
+      # findings of any kind. Runs against the Stacked Bar Chart page only
+      # for now -- add more URLs to .pa11yci as chart pages ship.
+      - name: Run Pa11y CI
+        id: pa11y
+        continue-on-error: true
+        run: npx pa11y-ci 2>&1 | tee pa11y-results.txt
+
+      - name: Build PR comment body
+        if: always()
+        run: |
+          {
+            echo "### Pa11y CI (errors only, WCAG2AA)"
+            echo
+            echo '```'
+            cat pa11y-results.txt
+            echo '```'
+          } > pa11y-comment.md
+
+      - name: Post results as PR comment
+        if: always() && github.event_name == 'pull_request'
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body-path: pa11y-comment.md
+
+      - name: Fail the job if Pa11y found errors
+        if: steps.pa11y.outcome == 'failure'
+        run: exit 1
