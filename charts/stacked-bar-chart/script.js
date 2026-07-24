@@ -65,7 +65,10 @@ function svgEl(name, attrs = {}) {
 
 function buildPatternDefs() {
   const defs = svgEl("defs");
-  const stroke = "rgba(0, 0, 0, 0.38)";
+  // A CSS custom property, not a literal color: prefers-contrast:more and
+  // forced-colors both override --pattern-stroke (see tokens.css) so the
+  // pattern lines stay visible/compliant without any JS branching here.
+  const stroke = "var(--pattern-stroke)";
 
   PATTERN_KINDS.forEach((kind, i) => {
     const pattern = svgEl("pattern", {
@@ -175,6 +178,7 @@ function buildBars() {
       const pattern = svgEl("path", {
         d: rectPath(x, y, barWidth, h),
         fill: `url(#stacked-bar-pattern-${segment.seriesIndex + 1})`,
+        class: "segment-pattern",
       });
 
       group.append(fill, pattern);
@@ -218,6 +222,7 @@ function buildHotspot({ x, y, width, height, text, barIndex, level }) {
   button.className = "hotspot";
   button.dataset.barIndex = String(barIndex);
   button.dataset.level = String(level); // "bar" or a segment index
+  button.dataset.tooltip = text; // read by the shared tooltip on hover/focus
   button.tabIndex = -1;
   button.style.left = `${(x / VIEWBOX_WIDTH) * 100}%`;
   button.style.top = `${(y / VIEWBOX_HEIGHT) * 100}%`;
@@ -341,6 +346,78 @@ function wireKeyboardNav(layer) {
 }
 
 // ---------------------------------------------------------------------
+// Shared tooltip: one floating element, not one popover per hotspot (180
+// of those would be wasteful). Shown on hover AND focus, so a sighted
+// keyboard user sees the same value a sighted mouse user would -- that
+// gap ("why explore with arrow keys if nothing is visible?") is exactly
+// what this fixes. It's aria-hidden because the content it shows is a
+// duplicate of the hotspot's own accessible name, already announced by
+// AT on focus; a screen reader user doesn't need it read twice.
+// ---------------------------------------------------------------------
+
+function buildTooltip(chartFigure) {
+  const tooltip = document.createElement("div");
+  tooltip.className = "chart-tooltip";
+  tooltip.setAttribute("aria-hidden", "true");
+  tooltip.hidden = true;
+  chartFigure.append(tooltip);
+
+  function show(hotspot) {
+    const figureRect = chartFigure.getBoundingClientRect();
+    const hotspotRect = hotspot.getBoundingClientRect();
+    const left = hotspotRect.left - figureRect.left + hotspotRect.width / 2;
+    const top = hotspotRect.top - figureRect.top;
+    const showBelow = top < 48;
+
+    tooltip.textContent = hotspot.dataset.tooltip;
+    tooltip.classList.toggle("chart-tooltip--below", showBelow);
+    tooltip.style.left = `${left}px`;
+    tooltip.style.top = showBelow ? `${top + hotspotRect.height}px` : `${top}px`;
+    tooltip.hidden = false;
+  }
+
+  function hide() {
+    tooltip.hidden = true;
+  }
+
+  return { show, hide };
+}
+
+function wireTooltip(layer, tooltip) {
+  function handleEnter(event) {
+    const hotspot = event.target.closest(".hotspot");
+    if (hotspot) tooltip.show(hotspot);
+  }
+
+  function handleLeave(event) {
+    const hotspot = event.target.closest(".hotspot");
+    if (!hotspot) return;
+    // Don't hide when focus/pointer moves to the hotspot's own hidden
+    // label span -- only hide once we've actually left the hotspot.
+    if (hotspot.contains(event.relatedTarget)) return;
+    tooltip.hide();
+  }
+
+  layer.addEventListener("mouseover", handleEnter);
+  layer.addEventListener("mouseout", handleLeave);
+  layer.addEventListener("focusin", handleEnter);
+  layer.addEventListener("focusout", handleLeave);
+}
+
+// ---------------------------------------------------------------------
+// Pattern toggle: patterns are off by default (solid color reads better),
+// on by request, and forced on -- with the toggle hidden -- under
+// forced-colors, where they stop being optional (see tokens.css).
+// ---------------------------------------------------------------------
+
+function wirePatternToggle(toggleInput, demoRoot) {
+  if (!toggleInput) return;
+  toggleInput.addEventListener("change", () => {
+    demoRoot.classList.toggle("patterns-visible", toggleInput.checked);
+  });
+}
+
+// ---------------------------------------------------------------------
 // Legend (static key, not an interactive filter -- see the "Legends as
 // filters" cross-cutting page, not yet built, for the interactive case).
 // ---------------------------------------------------------------------
@@ -447,7 +524,13 @@ document.addEventListener("DOMContentLoaded", () => {
     renderChart(chartContainer);
     const layer = buildHotspotLayer(chartContainer);
     wireKeyboardNav(layer);
+    const tooltip = buildTooltip(chartContainer);
+    wireTooltip(layer, tooltip);
   }
+
+  const demoRoot = document.getElementById("stacked-bar-demo");
+  const patternToggle = document.getElementById("stacked-bar-pattern-toggle");
+  if (demoRoot) wirePatternToggle(patternToggle, demoRoot);
 
   const legendContainer = document.getElementById("stacked-bar-legend");
   if (legendContainer) renderLegend(legendContainer);

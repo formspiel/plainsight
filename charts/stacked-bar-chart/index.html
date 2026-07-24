@@ -65,6 +65,60 @@
       many categories at once.
     </p>
 
+    <h2>Live demo</h2>
+    <p>
+      30 months of fictional insurance claims data, by category. Tab into the chart,
+      then use the arrow keys described below.
+    </p>
+
+    <div id="stacked-bar-demo" class="chart-demo">
+      <p class="chart-hint">
+        <span class="chart-hint__icon" aria-hidden="true">⌨</span>
+        <span id="stacked-bar-instructions">
+          Interactive chart with 30 months of data. Tab into the chart, then use
+          <kbd>←</kbd>/<kbd>→</kbd> to move between months, <kbd>↓</kbd>/<kbd>↑</kbd> to
+          explore categories within a month, and <kbd>Home</kbd>/<kbd>End</kbd> to jump
+          to the first or last month.
+        </span>
+      </p>
+
+      <div id="stacked-bar-chart" class="chart-figure">
+        <noscript>
+          <p>
+            This chart requires JavaScript to render. In the meantime, see the
+            <a href="#stacked-bar-table">data table</a> below or
+            <a href="data.csv" download>download the CSV</a>.
+          </p>
+        </noscript>
+      </div>
+
+      <div class="chart-controls">
+        <label class="pattern-toggle-wrapper">
+          <input type="checkbox" id="stacked-bar-pattern-toggle" />
+          Show patterns (in addition to color)
+        </label>
+      </div>
+
+      <div id="stacked-bar-legend"></div>
+
+      <details class="chart-longdesc">
+        <summary>Long description</summary>
+        <p>
+          Auto Collision is the largest single category most months, holding fairly
+          steady between about 17 and 27 claims. Weather &amp; Storm Damage swings the
+          most: it spikes to 20–31 claims each spring (March–May) and again each autumn
+          (September–November), then drops below 10 in summer and winter. Water Damage
+          (Non-Weather) shows close to the opposite seasonal pattern — pipe-burst claims
+          spike to 15–23 each winter (December–February) and fall to single digits the
+          rest of the year. Liability Claims stay comparatively flat all year, between 6
+          and 10. Wildlife &amp; Unusual Incidents stays low most months but more than
+          doubles every October and November, to 8–11 claims, during deer season.
+          Monthly totals range from 44 to 73 claims, with the highest totals concentrated
+          in spring storm season and October/November.
+        </p>
+      </details>
+    </div>
+
     <div class="callout">
       <p>
         This page is the template the rest of Plainsight's chart pages follow. If
@@ -138,7 +192,7 @@
             <td>Chart container</td>
             <td><code>group</code></td>
             <td><code>aria-label</code>: chart title + date range</td>
-            <td><code>aria-describedby</code>: one-time keyboard instructions (visually hidden)</td>
+            <td><code>aria-describedby</code>: one-time keyboard instructions (visible hint, see Live demo)</td>
           </tr>
           <tr>
             <td>Bar summary stop (one per month)</td>
@@ -151,6 +205,24 @@
             <td><code>button</code> (native)</td>
             <td>Text content: "January 2023, Auto Collision: 24 claims, 41% of this month's total."</td>
             <td>None — name is self-contained</td>
+          </tr>
+          <tr>
+            <td>Tooltip (hover/focus)</td>
+            <td><code>aria-hidden="true"</code> — not in the tree</td>
+            <td>n/a</td>
+            <td>n/a — duplicates the hotspot's own accessible name for sighted users only (see Screen reader behavior)</td>
+          </tr>
+          <tr>
+            <td>"Show patterns" toggle</td>
+            <td><code>checkbox</code> (native <code>&lt;input&gt;</code> in a <code>&lt;label&gt;</code>)</td>
+            <td>Label text: "Show patterns (in addition to color)"</td>
+            <td>None</td>
+          </tr>
+          <tr>
+            <td>Long description</td>
+            <td><code>group</code> (native <code>&lt;details&gt;</code>/<code>&lt;summary&gt;</code>)</td>
+            <td>Summary text: "Long description"</td>
+            <td>n/a — expanded content is the description itself</td>
           </tr>
           <tr>
             <td>Legend</td>
@@ -207,7 +279,16 @@
       since we don't use a grid/listbox role that implies set-size/position-in-set.
       The one-time instructions ("Use Left and Right arrow keys to move between
       months...") are attached to the chart container via <code>aria-describedby</code>
-      and are announced once, on first entry, not repeated per stop.
+      and are announced once, on first entry, not repeated per stop. They're also
+      visible on screen now (see the hint above the chart in the Live demo), not just
+      exposed to AT — a sighted keyboard user has no other way to discover that arrow
+      keys do anything here.
+    </p>
+    <p>
+      The floating tooltip that appears on hover and keyboard focus is
+      <code>aria-hidden="true"</code> and announces nothing extra — it exists purely so
+      a sighted mouse or keyboard user sees the same value a screen reader user already
+      hears, not to duplicate that announcement.
     </p>
 
     <h3>Verified SR × browser matrix</h3>
@@ -235,30 +316,6 @@
         </tbody>
       </table>
     </div>
-
-    <h2>Live demo</h2>
-    <p>
-      30 months of fictional insurance claims data, by category. Tab into the chart,
-      then use the arrow keys described above.
-    </p>
-
-    <div id="stacked-bar-chart" class="chart-figure">
-      <noscript>
-        <p>
-          This chart requires JavaScript to render. In the meantime, see the
-          <a href="#stacked-bar-table">data table</a> below or
-          <a href="data.csv" download>download the CSV</a>.
-        </p>
-      </noscript>
-    </div>
-    <p id="stacked-bar-instructions" class="visually-hidden">
-      Interactive chart with 30 months of data. Use Left and Right arrow keys to move
-      between months, Down arrow to explore the categories within a month, Up arrow to
-      move back toward the month summary, Home and End to jump to the first or last
-      month.
-    </p>
-
-    <div id="stacked-bar-legend"></div>
 
     <h2>Data table fallback</h2>
     <p>
@@ -299,6 +356,17 @@
         high-contrast/grayscale contexts. (WCAG 1.4.1 Use of Color)
       </li>
       <li>
+        <strong>Adjacent segment colors don't meet non-text contrast.</strong> Found
+        while building this very demo: this chart's own default palette measures well
+        under the 3:1 minimum between neighboring stacked segments (as low as 1.13:1
+        between two of them) — even the 1px separator between segments only reaches
+        2.57:1 against one of the five colors. <code>prefers-contrast: more</code> swaps
+        in a palette computed to clear 3:1 on every adjacent pair (try it: enable
+        "increase contrast" in your OS/browser settings and reload). Left visible here
+        deliberately rather than quietly fixed, because this is a genuinely common
+        real-world failure, not a hypothetical one. (WCAG 1.4.11 Non-text Contrast)
+      </li>
+      <li>
         <strong>No keyboard path to individual segment values</strong> — totals and
         breakdowns are only revealed by a mouse-hover tooltip. (WCAG 2.1.1 Keyboard,
         1.1.1 Non-text Content)
@@ -335,8 +403,9 @@
       <li>
         <strong>No distinct visual "focused/selected" state</strong> beyond the
         browser's default focus ring, which is not generally shown for touch taps at
-        all. A sighted touch user gets little visual feedback that a bar was "selected"
-        for exploration purposes.
+        all. The tooltip is hover/focus-triggered and doesn't have a touch equivalent
+        either — a sighted touch user gets little visual feedback that a bar was
+        "selected" for exploration purposes.
       </li>
     </ul>
 
