@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Ascending 3-bar chart glyph. Colors swap for light/dark via the
+       browser's own prefers-color-scheme -- same brand palette as tokens.css. -->
+  <style>
+    .bg { fill: #fbf8f1; }
+    .bar1 { fill: #a97d5d; }
+    .bar2 { fill: #5c755e; }
+    .bar3 { fill: #9c9f84; }
+    @media (prefers-color-scheme: dark) {
+      .bg { fill: #16181a; }
+      .bar2 { fill: #a9c7ac; }
+    }
+  </style>
+  <rect class="bg" width="32" height="32" rx="7" />
+  <rect class="bar1" x="6" y="18" width="5" height="9" rx="1" />
+  <rect class="bar2" x="13.5" y="12" width="5" height="15" rx="1" />
+  <rect class="bar3" x="21" y="7" width="5" height="20" rx="1" />
+</svg>
