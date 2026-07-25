@@ -183,12 +183,18 @@ Clearcut, Keynote (ruled out — conflicts with an existing product name).
    slow down shipping the core pattern reference. Patterns first. Issue drafted with
    candidate library list (Highcharts, Chart.js, D3, ECharts, Recharts, Nivo) and
    definition of done (verdict-style entries replacing/joining plain links).
-2. **Motion / reduced-motion decision** — deferred because hard to design in the
-   abstract; better decided against a real demo (Stacked Bar or Multi-Series Line) than
-   hypothetically. Default: entrance animation allowed normally, suppressed under
-   `prefers-reduced-motion`. Open question not yet resolved: whether value *changes*
-   (not just entrance) need a non-animated visual indicator under reduced motion so
-   sighted reduced-motion users don't miss a change entirely.
+2. **Motion / reduced-motion decision** — entrance animation (bars growing up from
+   the baseline, staggered left-to-right) now implemented on the Stacked Bar Chart as
+   the real demo to decide this against, per the plan below: allowed normally,
+   suppressed entirely under `prefers-reduced-motion` (confirmed straightforward in
+   practice — one `@media (prefers-reduced-motion: no-preference)` block wrapping the
+   `@keyframes` rule). The animation is purely visual (the hotspot overlay is
+   positioned independently and is immediately interactive/correct regardless of
+   whether the animation is playing). Still deferred, now that there's a real demo to
+   decide it against: whether value *changes* (not just entrance — e.g. toggling
+   "Show patterns", a future live-data update) need a non-animated visual indicator
+   under reduced motion so sighted reduced-motion users don't miss a change entirely.
+   Not yet addressed on the Stacked Bar Chart's own pattern toggle.
 3. **Changelog generation from git history** — deferred until there's meaningful
    (post-beta-churn) history to generate from. Confirmed feasible: Conventional Commits
    + a generator like `git-cliff` or `release-please` can filter to `feat`/`fix` only,

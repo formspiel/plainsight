@@ -13,6 +13,29 @@
   height: 100%;
 }
 
+/* Entrance animation: bars grow up from the baseline, staggered slightly
+   left-to-right (see the inline animation-delay in script.js). Suppressed
+   entirely under prefers-reduced-motion -- this is CLAUDE.md's stated
+   default (Backlog #2): entrance animation allowed normally, suppressed
+   under reduced motion. What still needs deciding (value *changes* under
+   reduced motion, etc.) is explicitly out of scope here. */
+@media (prefers-reduced-motion: no-preference) {
+  .chart-bar-group {
+    transform-box: fill-box;
+    transform-origin: bottom;
+    animation: chart-bar-grow 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  @keyframes chart-bar-grow {
+    from {
+      transform: scaleY(0);
+    }
+    to {
+      transform: scaleY(1);
+    }
+  }
+}
+
 .chart-gridline {
   stroke: var(--border);
   stroke-width: 1;

@@ -165,6 +165,20 @@ function buildBars() {
 
   stacks.forEach((stack, barIndex) => {
     const x = xForIndex(barIndex);
+
+    // Grouped per bar so the entrance animation scales the whole bar up
+    // from the baseline as one unit, not each segment separately from
+    // its own position. transform-origin: bottom (in chart.css) works
+    // here without any extra math: every bar's own bounding box already
+    // starts at the shared baseline, since that's where every stack
+    // begins. Suppressed under prefers-reduced-motion -- see chart.css.
+    // Purely visual: the hotspot overlay is positioned independently and
+    // is immediately correct/interactive, animation or not.
+    const barGroup = svgEl("g", {
+      class: "chart-bar-group",
+      style: `animation-delay: ${barIndex * 15}ms`,
+    });
+
     stack.segments.forEach((segment) => {
       const y = yScale(segment.end);
       const h = yScale(segment.start) - yScale(segment.end);
@@ -181,8 +195,10 @@ function buildBars() {
         class: "segment-pattern",
       });
 
-      group.append(fill, pattern);
+      barGroup.append(fill, pattern);
     });
+
+    group.append(barGroup);
   });
 
   return group;
