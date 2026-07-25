@@ -362,18 +362,44 @@ function buildTooltip(chartFigure) {
   tooltip.hidden = true;
   chartFigure.append(tooltip);
 
+  const EDGE_MARGIN = 8; // keep the tooltip this far from the container's edges
+
   function show(hotspot) {
     const figureRect = chartFigure.getBoundingClientRect();
     const hotspotRect = hotspot.getBoundingClientRect();
-    const left = hotspotRect.left - figureRect.left + hotspotRect.width / 2;
-    const top = hotspotRect.top - figureRect.top;
-    const showBelow = top < 48;
 
+    // Set content and reveal first -- we need the tooltip's actual
+    // rendered size (it wraps at different widths depending on the text)
+    // to clamp it, and an element with `hidden` measures as 0x0.
     tooltip.textContent = hotspot.dataset.tooltip;
-    tooltip.classList.toggle("chart-tooltip--below", showBelow);
-    tooltip.style.left = `${left}px`;
-    tooltip.style.top = showBelow ? `${top + hotspotRect.height}px` : `${top}px`;
     tooltip.hidden = false;
+    const tooltipWidth = tooltip.offsetWidth;
+    const tooltipHeight = tooltip.offsetHeight;
+
+    const anchorX = hotspotRect.left - figureRect.left + hotspotRect.width / 2;
+    const anchorTop = hotspotRect.top - figureRect.top;
+    const anchorBottom = anchorTop + hotspotRect.height;
+
+    // Horizontal: center on the hotspot, then slide back inside the
+    // container bounds if that would push either edge past them --
+    // this is the actual fix, centering alone (via CSS transform) has
+    // no awareness of the container edges at all.
+    const maxLeft = Math.max(
+      EDGE_MARGIN,
+      figureRect.width - tooltipWidth - EDGE_MARGIN
+    );
+    const left = Math.min(
+      Math.max(anchorX - tooltipWidth / 2, EDGE_MARGIN),
+      maxLeft
+    );
+
+    // Vertical: prefer above the hotspot; flip below if there's not
+    // enough room above (near the top of the chart).
+    const showBelow = anchorTop < tooltipHeight + EDGE_MARGIN * 2;
+    const top = showBelow ? anchorBottom + 10 : anchorTop - tooltipHeight - 10;
+
+    tooltip.style.left = `${left}px`;
+    tooltip.style.top = `${top}px`;
   }
 
   function hide() {

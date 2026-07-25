@@ -89,9 +89,12 @@
    aria-hidden in the markup: it duplicates the hotspot's own accessible
    name, which AT users already get from focus, so this is a sighted-user
    affordance only (mouse hover and sighted keyboard use alike). */
+/* Position (left/top) is set directly in script.js, in px, already
+   clamped to the container's bounds -- no CSS transform here, since
+   centering via transform: translate(-50%, ...) is exactly what let the
+   tooltip overflow past the container edge for bars near either side. */
 .chart-tooltip {
   position: absolute;
-  transform: translate(-50%, calc(-100% - 10px));
   background: var(--text);
   color: var(--bg);
   padding: 0.35rem 0.65rem;
@@ -102,10 +105,6 @@
   pointer-events: none;
   z-index: 20;
   box-shadow: 0 2px 8px rgb(0 0 0 / 0.2);
-}
-
-.chart-tooltip--below {
-  transform: translate(-50%, 10px);
 }
 
 .chart-tooltip[hidden] {
