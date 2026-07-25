@@ -116,7 +116,6 @@
   flex-wrap: wrap;
   align-items: flex-start;
   gap: 0.5rem;
-  margin: 1rem 0;
 }
 
 .toolbar-btn {
@@ -155,26 +154,37 @@ button.toolbar-btn[aria-pressed="true"] {
   border-color: var(--accent);
 }
 
-.keyboard-details {
-  position: relative;
-}
-
+/* Absolutely positioned (taken out of flow, so it can't distort the
+   toolbar's flex sizing the way it did as a normal flow child -- the
+   <details> flex item was growing to fit the open panel's width, pushing
+   its toolbar siblings onto their own line). Position is computed in
+   script.js (wireKeyboardPanel), clamped to .chart-demo's bounds -- same
+   edge-clamping approach as the chart's own data-point tooltip, because
+   a fixed CSS side (left:0 or right:0) isn't robust here either: it
+   overflowed off the right edge at full width, then off the left edge
+   once .chart-header wraps the toolbar onto its own line on narrow
+   screens. .chart-demo (position:relative) is the anchor. */
 .keyboard-panel {
   position: absolute;
   z-index: 15;
   top: calc(100% + 0.4rem);
-  left: 0;
+  width: min(24rem, calc(100vw - 2.5rem));
+  overflow-x: auto;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 8px;
   padding: 0.75rem 0.9rem;
   box-shadow: 0 4px 12px rgb(0 0 0 / 0.15);
-  min-width: 22rem;
 }
 
 .keyboard-panel table {
   border-collapse: collapse;
+  table-layout: fixed;
   width: 100%;
+  /* base.css's generic `table` rule sets min-width: 32rem for the page's
+     sortable data tables -- override it here or this compact panel table
+     gets forced to that width too, causing horizontal overflow. */
+  min-width: 0;
 }
 
 .keyboard-panel th,
@@ -183,13 +193,20 @@ button.toolbar-btn[aria-pressed="true"] {
   padding: 0.3rem 0.5rem 0.3rem 0;
   font-size: 0.85rem;
   border: 0;
+}
+
+/* table-layout: fixed means column widths come from these rules, not
+   content -- without it the key-name column's nowrap content sets the
+   intrinsic table width, which can exceed the panel and push the
+   description column into overflow-x scrolling instead of wrapping. */
+.keyboard-panel th {
+  width: 5.5rem;
   white-space: nowrap;
 }
 
 .keyboard-panel td {
   white-space: normal;
   color: var(--text-muted);
-  width: 100%;
 }
 
 /* Shared floating tooltip, shown on hover AND focus of any hotspot.
@@ -218,24 +235,37 @@ button.toolbar-btn[aria-pressed="true"] {
   display: none;
 }
 
-/* Visible keyboard hint -- previously screen-reader-only text, also
-   attached via aria-describedby so it still reaches AT users once, on
-   entry, without being repeated per stop. */
-.chart-hint {
-  display: flex;
-  align-items: baseline;
-  gap: 0.5rem;
-  font-size: 0.9rem;
-  color: var(--text-muted);
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 0.6rem 0.9rem;
-  margin: 1rem 0 0;
+/* Chart title + toolbar, in one header row: title left, options top-right,
+   directly above the chart -- visually ties the chart and its legend
+   together as one unit, with the options addressing "this chart" rather
+   than floating unanchored between chart and legend (where they lived
+   before). Wraps on narrow viewports (title above, toolbar below). */
+/* .chart-toolbar (below) is the actual position:relative ancestor the
+   keyboard-shortcuts panel (position:absolute, see .keyboard-panel) gets
+   placed against -- it's the nearest positioned ancestor in the DOM, so
+   the browser uses it as the containing block regardless of this rule.
+   This rule instead gives script.js's wireKeyboardPanel() a stable outer
+   boundary (the demo's full width) to clamp the panel's left offset
+   against, in page coordinates, before converting back into the
+   toolbar's coordinate space -- so the panel stays inside the demo
+   regardless of where in the (wrapping) toolbar row the button ends up. */
+.chart-demo {
+  position: relative;
 }
 
-.chart-hint__icon {
-  flex: none;
+.chart-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  margin-top: 1rem;
+}
+
+#stacked-bar-title {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0;
 }
 
 /* Long description: a native, keyboard-operable disclosure -- available

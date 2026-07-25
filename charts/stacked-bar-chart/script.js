@@ -257,7 +257,12 @@ function buildHotspotLayer(container) {
   const layer = document.createElement("div");
   layer.className = "chart-hotspots";
   layer.setAttribute("role", "group");
-  layer.setAttribute("aria-label", "Insurance claims by category, January 2023 to June 2025, stacked bar chart");
+  // Named from the visible chart title, which itself contains a
+  // visually-hidden "Stacked bar chart:" type-prefix span as a child --
+  // reference only the title id here, not both ids, since referencing
+  // the prefix span separately as well as its ancestor title would
+  // duplicate the prefix text in the computed accessible name.
+  layer.setAttribute("aria-labelledby", "stacked-bar-title");
   layer.setAttribute("aria-describedby", "stacked-bar-instructions");
 
   stacks.forEach((stack, barIndex) => {
@@ -467,6 +472,55 @@ function wirePatternToggle(toggleButton, demoRoot) {
 }
 
 // ---------------------------------------------------------------------
+// Keyboard shortcuts panel: positioned in JS, not pinned to a CSS side.
+// The toolbar sits top-right of the chart but wraps onto its own line
+// (left-aligned) on narrow screens, so a fixed left:0 or right:0 anchor
+// overflows one edge or the other depending on viewport width -- same
+// edge-clamping approach as the chart's own data-point tooltip, clamped
+// against .chart-demo (the widest stable container) but expressed in the
+// panel's own offsetParent coordinate space (.chart-toolbar, which is
+// itself position: relative) -- NOT demoRoot's, since that's what the
+// browser actually positions "left" against.
+// ---------------------------------------------------------------------
+
+function wireKeyboardPanel(details, demoRoot) {
+  if (!details) return;
+  const summary = details.querySelector("summary");
+  const panel = details.querySelector(".keyboard-panel");
+  if (!summary || !panel) return;
+
+  const EDGE_MARGIN = 8;
+
+  details.addEventListener("toggle", () => {
+    if (!details.open) return;
+    const offsetParent = panel.offsetParent;
+    if (!offsetParent) return;
+    const parentRect = offsetParent.getBoundingClientRect();
+    const demoRect = demoRoot.getBoundingClientRect();
+    const summaryRect = summary.getBoundingClientRect();
+    const panelWidth = panel.offsetWidth;
+
+    // Clamp bounds in page coordinates, against the demo container. On
+    // narrow viewports the panel's own width (see .keyboard-panel's
+    // calc(100vw - 2.5rem) cap) can already consume nearly all of
+    // demoRect's width, leaving no room for an 8px margin on both sides
+    // -- fall back to a flush fit against the container edges rather
+    // than let the preferred margin push the panel past demoRect.right.
+    let minPageLeft = demoRect.left + EDGE_MARGIN;
+    let maxPageLeft = demoRect.right - panelWidth - EDGE_MARGIN;
+    if (minPageLeft > maxPageLeft) {
+      minPageLeft = demoRect.left;
+      maxPageLeft = demoRect.right - panelWidth;
+    }
+    const pageLeft = Math.min(Math.max(summaryRect.left, minPageLeft), maxPageLeft);
+
+    // ...then convert into the offsetParent's coordinate space, since
+    // that's what the "left" CSS property is actually relative to.
+    panel.style.left = `${pageLeft - parentRect.left}px`;
+  });
+}
+
+// ---------------------------------------------------------------------
 // Legend (static key, not an interactive filter -- see the "Legends as
 // filters" cross-cutting page, not yet built, for the interactive case).
 // ---------------------------------------------------------------------
@@ -585,6 +639,10 @@ document.addEventListener("DOMContentLoaded", () => {
   if (toolbar) {
     const toolbarTooltip = buildTooltip(toolbar);
     wireTooltip(toolbar, toolbarTooltip, ".toolbar-btn");
+  }
+
+  if (demoRoot) {
+    wireKeyboardPanel(document.querySelector(".keyboard-details"), demoRoot);
   }
 
   const legendContainer = document.getElementById("stacked-bar-legend");
