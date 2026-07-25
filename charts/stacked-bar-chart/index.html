@@ -94,16 +94,22 @@
       </div>
 
       <div class="chart-toolbar" role="group" aria-label="Chart options">
-        <button type="button" id="stacked-bar-pattern-toggle" class="toolbar-btn" aria-pressed="false">
+        <button
+          type="button"
+          id="stacked-bar-pattern-toggle"
+          class="toolbar-btn"
+          aria-pressed="false"
+          aria-label="Patterns"
+          data-tooltip="Patterns"
+        >
           <svg class="toolbar-btn__icon" viewBox="0 0 20 20" aria-hidden="true">
             <rect x="3" y="3" width="14" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="1.5" />
             <path d="M3 10 L10 3 M3 15 L15 3 M8 17 L17 8 M13 17 L17 13" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
           </svg>
-          <span>Patterns</span>
         </button>
 
         <details class="keyboard-details">
-          <summary class="toolbar-btn">
+          <summary class="toolbar-btn" aria-label="Keyboard shortcuts" data-tooltip="Keyboard shortcuts">
             <svg class="toolbar-btn__icon" viewBox="0 0 20 20" aria-hidden="true">
               <rect x="2" y="5" width="16" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="1.5" />
               <rect x="4.5" y="7.5" width="1.6" height="1.6" fill="currentColor" />
@@ -112,7 +118,6 @@
               <rect x="13.5" y="7.5" width="1.6" height="1.6" fill="currentColor" />
               <rect x="4.5" y="10.5" width="9" height="1.6" fill="currentColor" />
             </svg>
-            <span>Keyboard shortcuts</span>
           </summary>
           <div class="keyboard-panel">
             <table>
@@ -128,12 +133,11 @@
           </div>
         </details>
 
-        <a class="toolbar-btn" href="data.csv" download>
+        <a class="toolbar-btn" href="data.csv" download aria-label="Download CSV" data-tooltip="Download CSV">
           <svg class="toolbar-btn__icon" viewBox="0 0 20 20" aria-hidden="true">
             <path d="M10 2.5 V12.5 M6 9 L10 13 L14 9" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
             <path d="M3.5 14.5 V16 a1 1 0 0 0 1 1 h11 a1 1 0 0 0 1 -1 v-1.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
           </svg>
-          <span>Download CSV</span>
         </a>
       </div>
 
@@ -259,20 +263,20 @@
           <tr>
             <td>"Patterns" toggle</td>
             <td><code>button</code> (native), toggle pattern via <code>aria-pressed</code></td>
-            <td>Text content: "Patterns" (icon is <code>aria-hidden</code>)</td>
-            <td>None</td>
+            <td><code>aria-label</code>: "Patterns" — icon-only, no visible text, so the accessible name can't come from content (icon is <code>aria-hidden</code>)</td>
+            <td>None. A visible tooltip appears on hover/focus with the same text as <code>aria-label</code>, but it's decorative (<code>aria-hidden</code>) — sighted-only, not a second AT-facing description</td>
           </tr>
           <tr>
             <td>"Keyboard shortcuts" disclosure</td>
             <td><code>group</code> (native <code>&lt;details&gt;</code>/<code>&lt;summary&gt;</code>), same pattern as Long description below</td>
-            <td>Summary text: "Keyboard shortcuts"</td>
+            <td><code>aria-label</code> on the <code>&lt;summary&gt;</code>: "Keyboard shortcuts" (icon-only, same reasoning as the toggle above)</td>
             <td>n/a — expanded content (a table) is the reference itself</td>
           </tr>
           <tr>
             <td>"Download CSV"</td>
             <td><code>link</code> (native <code>&lt;a download&gt;</code>)</td>
-            <td>Text content: "Download CSV" (icon is <code>aria-hidden</code>)</td>
-            <td>None</td>
+            <td><code>aria-label</code>: "Download CSV" (icon-only, same reasoning as the toggle above)</td>
+            <td>None (same hover/focus tooltip caveat as above)</td>
           </tr>
           <tr>
             <td>Long description</td>

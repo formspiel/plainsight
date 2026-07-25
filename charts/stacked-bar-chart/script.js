@@ -362,55 +362,57 @@ function wireKeyboardNav(layer) {
 }
 
 // ---------------------------------------------------------------------
-// Shared tooltip: one floating element, not one popover per hotspot (180
-// of those would be wasteful). Shown on hover AND focus, so a sighted
-// keyboard user sees the same value a sighted mouse user would -- that
-// gap ("why explore with arrow keys if nothing is visible?") is exactly
-// what this fixes. It's aria-hidden because the content it shows is a
-// duplicate of the hotspot's own accessible name, already announced by
-// AT on focus; a screen reader user doesn't need it read twice.
+// Shared tooltip: one floating element per container, not one popover
+// per target (180 hotspots would make that wasteful, and it's reused
+// below for the toolbar's icon-only buttons too). Shown on hover AND
+// focus, so a sighted keyboard user sees the same value/label a sighted
+// mouse user would. It's aria-hidden because the content it shows always
+// duplicates the target's own accessible name (the hotspot's text
+// content, or a toolbar button's aria-label) -- AT users already get
+// that on focus, so this is a sighted-only convenience, never a second
+// source of truth.
 // ---------------------------------------------------------------------
 
-function buildTooltip(chartFigure) {
+function buildTooltip(container) {
   const tooltip = document.createElement("div");
   tooltip.className = "chart-tooltip";
   tooltip.setAttribute("aria-hidden", "true");
   tooltip.hidden = true;
-  chartFigure.append(tooltip);
+  container.append(tooltip);
 
   const EDGE_MARGIN = 8; // keep the tooltip this far from the container's edges
 
-  function show(hotspot) {
-    const figureRect = chartFigure.getBoundingClientRect();
-    const hotspotRect = hotspot.getBoundingClientRect();
+  function show(target) {
+    const containerRect = container.getBoundingClientRect();
+    const targetRect = target.getBoundingClientRect();
 
     // Set content and reveal first -- we need the tooltip's actual
     // rendered size (it wraps at different widths depending on the text)
     // to clamp it, and an element with `hidden` measures as 0x0.
-    tooltip.textContent = hotspot.dataset.tooltip;
+    tooltip.textContent = target.dataset.tooltip;
     tooltip.hidden = false;
     const tooltipWidth = tooltip.offsetWidth;
     const tooltipHeight = tooltip.offsetHeight;
 
-    const anchorX = hotspotRect.left - figureRect.left + hotspotRect.width / 2;
-    const anchorTop = hotspotRect.top - figureRect.top;
-    const anchorBottom = anchorTop + hotspotRect.height;
+    const anchorX = targetRect.left - containerRect.left + targetRect.width / 2;
+    const anchorTop = targetRect.top - containerRect.top;
+    const anchorBottom = anchorTop + targetRect.height;
 
-    // Horizontal: center on the hotspot, then slide back inside the
+    // Horizontal: center on the target, then slide back inside the
     // container bounds if that would push either edge past them --
     // this is the actual fix, centering alone (via CSS transform) has
     // no awareness of the container edges at all.
     const maxLeft = Math.max(
       EDGE_MARGIN,
-      figureRect.width - tooltipWidth - EDGE_MARGIN
+      containerRect.width - tooltipWidth - EDGE_MARGIN
     );
     const left = Math.min(
       Math.max(anchorX - tooltipWidth / 2, EDGE_MARGIN),
       maxLeft
     );
 
-    // Vertical: prefer above the hotspot; flip below if there's not
-    // enough room above (near the top of the chart).
+    // Vertical: prefer above the target; flip below if there's not
+    // enough room above (near the top of the container).
     const showBelow = anchorTop < tooltipHeight + EDGE_MARGIN * 2;
     const top = showBelow ? anchorBottom + 10 : anchorTop - tooltipHeight - 10;
 
@@ -425,18 +427,21 @@ function buildTooltip(chartFigure) {
   return { show, hide };
 }
 
-function wireTooltip(layer, tooltip) {
+// selector defaults to ".hotspot" (the chart's data points); the toolbar
+// wiring below passes ".toolbar-btn" to reuse the exact same mechanism.
+function wireTooltip(layer, tooltip, selector = ".hotspot") {
   function handleEnter(event) {
-    const hotspot = event.target.closest(".hotspot");
-    if (hotspot) tooltip.show(hotspot);
+    const target = event.target.closest(selector);
+    if (target) tooltip.show(target);
   }
 
   function handleLeave(event) {
-    const hotspot = event.target.closest(".hotspot");
-    if (!hotspot) return;
-    // Don't hide when focus/pointer moves to the hotspot's own hidden
-    // label span -- only hide once we've actually left the hotspot.
-    if (hotspot.contains(event.relatedTarget)) return;
+    const target = event.target.closest(selector);
+    if (!target) return;
+    // Don't hide when focus/pointer moves to the target's own child
+    // (e.g. the hotspot's hidden label span, or a button's icon) --
+    // only hide once we've actually left the target.
+    if (target.contains(event.relatedTarget)) return;
     tooltip.hide();
   }
 
@@ -575,6 +580,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const demoRoot = document.getElementById("stacked-bar-demo");
   const patternToggle = document.getElementById("stacked-bar-pattern-toggle");
   if (demoRoot) wirePatternToggle(patternToggle, demoRoot);
+
+  const toolbar = document.querySelector(".chart-toolbar");
+  if (toolbar) {
+    const toolbarTooltip = buildTooltip(toolbar);
+    wireTooltip(toolbar, toolbarTooltip, ".toolbar-btn");
+  }
 
   const legendContainer = document.getElementById("stacked-bar-legend");
   if (legendContainer) renderLegend(legendContainer);
