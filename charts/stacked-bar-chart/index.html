@@ -93,11 +93,48 @@
         </noscript>
       </div>
 
-      <div class="chart-controls">
-        <label class="pattern-toggle-wrapper">
-          <input type="checkbox" id="stacked-bar-pattern-toggle" />
-          Show patterns (in addition to color)
-        </label>
+      <div class="chart-toolbar" role="group" aria-label="Chart options">
+        <button type="button" id="stacked-bar-pattern-toggle" class="toolbar-btn" aria-pressed="false">
+          <svg class="toolbar-btn__icon" viewBox="0 0 20 20" aria-hidden="true">
+            <rect x="3" y="3" width="14" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="1.5" />
+            <path d="M3 10 L10 3 M3 15 L15 3 M8 17 L17 8 M13 17 L17 13" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+          </svg>
+          <span>Patterns</span>
+        </button>
+
+        <details class="keyboard-details">
+          <summary class="toolbar-btn">
+            <svg class="toolbar-btn__icon" viewBox="0 0 20 20" aria-hidden="true">
+              <rect x="2" y="5" width="16" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="1.5" />
+              <rect x="4.5" y="7.5" width="1.6" height="1.6" fill="currentColor" />
+              <rect x="7.5" y="7.5" width="1.6" height="1.6" fill="currentColor" />
+              <rect x="10.5" y="7.5" width="1.6" height="1.6" fill="currentColor" />
+              <rect x="13.5" y="7.5" width="1.6" height="1.6" fill="currentColor" />
+              <rect x="4.5" y="10.5" width="9" height="1.6" fill="currentColor" />
+            </svg>
+            <span>Keyboard shortcuts</span>
+          </summary>
+          <div class="keyboard-panel">
+            <table>
+              <caption class="visually-hidden">Full keyboard shortcut reference</caption>
+              <tbody>
+                <tr><th scope="row"><kbd>←</kbd>/<kbd>→</kbd></th><td>Move between months</td></tr>
+                <tr><th scope="row"><kbd>↓</kbd>/<kbd>↑</kbd></th><td>Explore categories within a month</td></tr>
+                <tr><th scope="row"><kbd>Home</kbd>/<kbd>End</kbd></th><td>Jump to the first/last month</td></tr>
+                <tr><th scope="row"><kbd>Esc</kbd></th><td>From a category, jump back to the month summary</td></tr>
+                <tr><th scope="row"><kbd>Tab</kbd></th><td>Enter the chart, then leave it entirely (one Tab stop)</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </details>
+
+        <a class="toolbar-btn" href="data.csv" download>
+          <svg class="toolbar-btn__icon" viewBox="0 0 20 20" aria-hidden="true">
+            <path d="M10 2.5 V12.5 M6 9 L10 13 L14 9" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M3.5 14.5 V16 a1 1 0 0 0 1 1 h11 a1 1 0 0 0 1 -1 v-1.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          <span>Download CSV</span>
+        </a>
       </div>
 
       <div id="stacked-bar-legend"></div>
@@ -214,9 +251,27 @@
             <td>n/a — duplicates the hotspot's own accessible name for sighted users only (see Screen reader behavior)</td>
           </tr>
           <tr>
-            <td>"Show patterns" toggle</td>
-            <td><code>checkbox</code> (native <code>&lt;input&gt;</code> in a <code>&lt;label&gt;</code>)</td>
-            <td>Label text: "Show patterns (in addition to color)"</td>
+            <td>Chart toolbar</td>
+            <td><code>group</code></td>
+            <td><code>aria-label</code>: "Chart options"</td>
+            <td>n/a</td>
+          </tr>
+          <tr>
+            <td>"Patterns" toggle</td>
+            <td><code>button</code> (native), toggle pattern via <code>aria-pressed</code></td>
+            <td>Text content: "Patterns" (icon is <code>aria-hidden</code>)</td>
+            <td>None</td>
+          </tr>
+          <tr>
+            <td>"Keyboard shortcuts" disclosure</td>
+            <td><code>group</code> (native <code>&lt;details&gt;</code>/<code>&lt;summary&gt;</code>), same pattern as Long description below</td>
+            <td>Summary text: "Keyboard shortcuts"</td>
+            <td>n/a — expanded content (a table) is the reference itself</td>
+          </tr>
+          <tr>
+            <td>"Download CSV"</td>
+            <td><code>link</code> (native <code>&lt;a download&gt;</code>)</td>
+            <td>Text content: "Download CSV" (icon is <code>aria-hidden</code>)</td>
             <td>None</td>
           </tr>
           <tr>
@@ -321,11 +376,9 @@
     <h2>Data table fallback</h2>
     <p>
       Same dataset, sortable by any column. This is a genuine parallel option for
-      readers who want exact values — not a replacement for the chart above.
+      readers who want exact values — not a replacement for the chart above. (CSV
+      download is in the chart's own toolbar, in the Live demo section above.)
     </p>
-    <div class="chart-controls">
-      <a class="download-link" href="data.csv" download>⭳ Download CSV</a>
-    </div>
     <div id="stacked-bar-table-wrapper" class="data-table-wrapper">
       <table id="stacked-bar-table">
         <caption>Monthly insurance claims by category, January 2023–June 2025</caption>

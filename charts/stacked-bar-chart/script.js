@@ -452,10 +452,12 @@ function wireTooltip(layer, tooltip) {
 // forced-colors, where they stop being optional (see tokens.css).
 // ---------------------------------------------------------------------
 
-function wirePatternToggle(toggleInput, demoRoot) {
-  if (!toggleInput) return;
-  toggleInput.addEventListener("change", () => {
-    demoRoot.classList.toggle("patterns-visible", toggleInput.checked);
+function wirePatternToggle(toggleButton, demoRoot) {
+  if (!toggleButton) return;
+  toggleButton.addEventListener("click", () => {
+    const pressed = toggleButton.getAttribute("aria-pressed") === "true";
+    toggleButton.setAttribute("aria-pressed", String(!pressed));
+    demoRoot.classList.toggle("patterns-visible", !pressed);
   });
 }
 
