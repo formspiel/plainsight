@@ -8,18 +8,23 @@
 */
 
 :root {
-  /* ---- Brand palette (fixed) ---- */
-  --color-sage: #9c9f84;
-  --color-terracotta: #a97d5d;
-  --color-cream: #f7dcb4;
-  --color-forest: #5c755e;
+  /* ---- Brand palette ----
+     "A-lite": a 50/50 blend of the original brand colors and a more
+     saturated "warm boost" candidate, picked after a design review round
+     to read as designed/vibrant without losing the warm-earthy character.
+     Same hue angles as the original palette throughout -- only lightness
+     and saturation moved. */
+  --color-sage: #a1a968;
+  --color-terracotta: #b57648;
+  --color-cream: #f5d8ad;
+  --color-forest: #4a7b4e;
 
   /* ---- Extra hues, added only because 5 chart series need distinct,
      non-adjacent hues and the brand palette has two greens (sage/forest)
      that sit too close together for series 3+4. Named for what they add,
      not for looks. ---- */
-  --color-slate-blue: #5d7a99; /* water-coded, for the Water Damage series */
-  --color-plum: #8b5d73; /* fifth series hue, kept out of the green family */
+  --color-slate-blue: #547ca7; /* water-coded, for the Water Damage series */
+  --color-plum: #945071; /* fifth series hue, kept out of the green family */
 
   /* ---- Neutrals, derived for text/background/border use the four brand
      colors can't safely cover (none of them work as body text or as a
@@ -36,12 +41,27 @@
   --color-coal-raised: #1f221d;
   --color-border-dark: #3a3d34;
 
-  /* Lightened forest for dark-theme links/focus: raw --color-forest doesn't
-     clear 4.5:1 against --color-coal, this does. */
-  --color-forest-tint: #a9c7ac;
-  /* Deepened terracotta for light-theme visited-link use, distinguishable
-     from --color-link without leaving the brand family. */
-  --color-terracotta-shade: #8a6349;
+  /* Lightened forest, used only for the Weather & Storm Damage chart
+     segment in dark mode (--series-2) -- raw --color-forest already
+     clears the 3:1 non-text minimum against --color-coal (3.59:1), this
+     just gives it more presence as a chart fill. NOT used for --link:
+     see the note on --color-plum-tint below for why a color lightened for
+     dark-background presence and a color lightened for dark-background
+     *text* contrast are two different jobs. */
+  --color-forest-tint: #53ac5a;
+  /* Lightened plum, for --link/badge use on dark backgrounds specifically
+     -- raw --color-plum only clears 3.09:1 against --color-coal, well
+     under the 4.5:1 text needs. This is deliberately a separate token
+     from a hypothetical "chart fill" tint: a button's fill color must
+     stay constant across themes (see tokens below, --accent), because
+     the lightening that makes a color readable as dark-mode text is
+     exactly what makes it too light to hold white button text underneath
+     -- --color-forest at 4.96:1 vs white would drop to ~2.8:1 if lightened
+     the way --color-plum-tint is here. */
+  --color-plum-tint: #b06d8e;
+  /* Deepened plum for light-theme visited-link use, distinguishable from
+     --color-plum without leaving the brand family. */
+  --color-plum-shade: #854262;
 }
 
 /* ---------- Light theme (default) ---------- */
@@ -51,11 +71,11 @@
   --text: var(--color-ink);
   --text-muted: var(--color-ink-muted);
   --border: var(--color-border-light);
-  --link: var(--color-forest);
-  --link-visited: var(--color-terracotta-shade);
+  --link: var(--color-plum);
+  --link-visited: var(--color-plum-shade);
   --focus-ring: var(--color-forest);
-  --accent: var(--color-terracotta);
-  --accent-contrast: var(--color-ink);
+  --accent: var(--color-forest);
+  --accent-contrast: #ffffff;
 
   /* Chart series tokens: color is never the only encoding (see
      patterns/color-encoding) — each series also gets an SVG pattern fill,
@@ -69,7 +89,13 @@
   --pattern-stroke: rgb(0 0 0 / 0.38); /* non-color segment pattern lines */
 }
 
-/* ---------- Dark theme ---------- */
+/* ---------- Dark theme ----------
+   --accent/--accent-contrast/--focus-ring have NO override here on
+   purpose: --color-forest already clears 4.96:1 against white (button
+   text) and 3.59:1 against --color-coal (its own visibility as a
+   boundary/ring against a dark page) -- both themes use the exact same
+   value. Only roles that are themselves text sitting on the page
+   background (--link) need the usual per-theme tint. */
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: var(--color-coal);
@@ -77,11 +103,8 @@
     --text: var(--color-snow);
     --text-muted: var(--color-snow-muted);
     --border: var(--color-border-dark);
-    --link: var(--color-forest-tint);
+    --link: var(--color-plum-tint);
     --link-visited: var(--color-cream);
-    --focus-ring: var(--color-cream);
-    --accent: var(--color-cream);
-    --accent-contrast: var(--color-coal);
 
     --series-1: var(--color-terracotta);
     --series-2: var(--color-forest-tint);
@@ -97,8 +120,8 @@
 
    The default --series-* colors below (in the :root block above) do NOT
    meet WCAG 1.4.11 Non-text Contrast between adjacent stacked segments --
-   measured, not assumed: e.g. series-2 vs series-3 is ~1.1:1 in light
-   mode, series-4 vs series-5 ~2:1, both well under the 3:1 minimum for
+   measured, not assumed: series-2 vs series-3 is 1.14:1 in light mode,
+   series-4 vs series-5 2.3:1, both well under the 3:1 minimum for
    adjacent graphical objects. That's a real, common failure mode (see
    "Common failure patterns" below) and this demo deliberately leaves the
    default palette showing it rather than hiding it.

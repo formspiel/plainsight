@@ -283,15 +283,17 @@ pre {
   color: var(--text-muted);
 }
 
+/* Text-on-page-background role (like --link), not the button/--accent
+   role: uses --color-plum / --color-plum-tint, not forest. */
 .badge--done {
-  border-color: var(--color-forest);
-  color: var(--color-forest);
+  border-color: var(--color-plum);
+  color: var(--color-plum);
 }
 
 @media (prefers-color-scheme: dark) {
   .badge--done {
-    border-color: var(--color-forest-tint);
-    color: var(--color-forest-tint);
+    border-color: var(--color-plum-tint);
+    color: var(--color-plum-tint);
   }
 }
 

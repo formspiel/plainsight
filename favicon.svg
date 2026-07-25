@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
   <style>
-    .bg{fill:#fbf8f1}.bar1{fill:#a97d5d}.bar2{fill:#5c755e}.bar3{fill:#9c9f84}@media (prefers-color-scheme:dark){.bg{fill:#16181a}.bar2{fill:#a9c7ac}}
+    .bg{fill:#fbf8f1}.bar1{fill:#b57648}.bar2{fill:#4a7b4e}.bar3{fill:#a1a968}@media (prefers-color-scheme:dark){.bg{fill:#16181a}.bar2{fill:#53ac5a}}
   </style>
   <rect width="32" height="32" class="bg" rx="7"/>
   <rect width="5" height="9" x="6" y="18" class="bar1" rx="1"/>
