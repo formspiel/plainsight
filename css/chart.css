@@ -326,24 +326,29 @@ button.toolbar-btn[aria-pressed="true"] {
   display: none;
 }
 
-/* Tooltips are a hover/focus-driven, sighted-only convenience -- see
-   the comment above .chart-tooltip. On a touch device there's no real
-   hover state, and a tap collapses focus and click into one ambiguous
-   gesture, which showed up as three different broken behaviors on the
-   toolbar's three buttons: stuck open (a plain toggle button, nothing
-   ever fires a "leave" event to hide it), a visible flash (the
-   keyboard-shortcuts button explicitly hides the tooltip the instant
-   its panel opens, and on tap both happen at once), and never
-   appearing at all (the CSV download interrupts the page before the
-   focus-triggered show() has anything to render). Rather than patch
-   each of those three differently, this suppresses the tooltip
-   outright wherever there's no fine pointer with genuine hover
-   capability -- one honest "doesn't try" beats three different
-   half-working attempts. AT users on touch (VoiceOver/TalkBack) are
-   unaffected either way: they already get the accessible name directly
-   on tap, no tooltip involved. */
+/* Scoped to the TOOLBAR's tooltip instance specifically
+   (.chart-toolbar .chart-tooltip), not the chart's own data-point
+   tooltip (.chart-canvas .chart-tooltip, built separately -- see
+   script.js) -- the chart's tooltip has no side-effecting action
+   competing with it on tap (a hotspot's only job is to be focused), so
+   it doesn't hit the problem below and works fine on touch as-is.
+   The toolbar's three buttons each DO something on tap, and that's
+   exactly what breaks: one tap collapses hover and click into one
+   ambiguous gesture, with no reliable "the user has moved on" signal,
+   which showed up as three different broken behaviors: stuck open (a
+   plain toggle button, nothing ever fires a "leave" event to hide it),
+   a visible flash (the keyboard-shortcuts button explicitly hides the
+   tooltip the instant its panel opens, and on tap both happen at once),
+   and never appearing at all (the CSV download interrupts the page
+   before the focus-triggered show() has anything to render). Rather
+   than patch each of those three differently, this suppresses the
+   toolbar's tooltip outright wherever there's no fine pointer with
+   genuine hover capability -- one honest "doesn't try" beats three
+   different half-working attempts. AT users on touch (VoiceOver/
+   TalkBack) are unaffected either way: they already get the accessible
+   name directly on tap, no tooltip involved. */
 @media (hover: none), (pointer: coarse) {
-  .chart-tooltip {
+  .chart-toolbar .chart-tooltip {
     display: none !important;
   }
 }

@@ -566,11 +566,13 @@
         different symptoms from the same root cause: hover and focus are two separate
         signals on desktop, but tap collapses them into one ambiguous gesture with no
         reliable way to detect "the user has moved on." Fixed here by suppressing the
-        tooltip outright under <code>(hover: none), (pointer: coarse)</code> (see
-        "Mobile / touch equivalent" below) rather than patching each symptom
-        separately — worth checking for specifically any time a tooltip mechanism
-        built and tested with a mouse gets shipped without a pass on an actual touch
-        device. (WCAG 2.5.1 Pointer Gestures is not violated here — there's no gesture
+        toolbar's tooltip specifically under <code>(hover: none), (pointer:
+        coarse)</code> (see "Mobile / touch equivalent" below) rather than patching
+        each symptom separately — the chart's own data-point tooltip needed no change,
+        since a hotspot's only job is to be focused, with no competing action on tap to
+        interfere with it. Worth checking for specifically any time a tooltip
+        mechanism built and tested with a mouse gets shipped without a pass on an
+        actual touch device. (WCAG 2.5.1 Pointer Gestures is not violated here — there's no gesture
         being required — but this is exactly the kind of desktop-only testing gap that
         produces real touch failures with no single WCAG criterion to catch them)
       </li>
@@ -605,16 +607,17 @@
       <li>
         <strong>No distinct visual "focused/selected" state</strong> beyond the
         browser's default focus ring, which is not generally shown for touch taps at
-        all. The hover/focus tooltip is deliberately suppressed on touch entirely (see
-        next) rather than attempting a broken touch equivalent, so a sighted touch user
-        gets no extra visual confirmation that a bar was "selected" for exploration —
-        the chart's own visible state (the focused segment's fill/pattern) is what's
-        left to notice.
+        all. The chart's own data-point tooltip still shows on tap (see next for why
+        it's fine on touch while the toolbar's isn't), so that's the one extra visual
+        confirmation a sighted touch user does get that a bar was "selected."
       </li>
       <li>
-        <strong>The hover/focus tooltip is suppressed outright below <code>(hover:
-        hover) and (pointer: fine)</code></strong>, rather than left to run. On a touch
-        device, one tap collapses "hover" and "click" into a single ambiguous gesture,
+        <strong>The toolbar's hover/focus tooltip specifically is suppressed outright
+        below <code>(hover: hover) and (pointer: fine)</code></strong> — not the
+        chart's own data-point tooltip, which has no competing action on tap (a
+        hotspot's only job is to be focused) and works fine on touch as-is. The
+        toolbar's three buttons each *do* something on tap, and that's exactly what
+        breaks: one tap collapses "hover" and "click" into a single ambiguous gesture,
         which produced three different broken behaviors depending on what the tapped
         toolbar button actually does: tapping "Toggle patterns" left the tooltip stuck
         visible (nothing ever fires a "leave" event on touch to hide it); tapping "Open
@@ -623,9 +626,10 @@
         happen in the same tap); and tapping "Download CSV" showed no tooltip at all
         (the download interrupts the page before the focus-triggered tooltip has
         anything to render). Rather than patch each of those three differently, the
-        tooltip doesn't try to run on touch at all — an honest "doesn't attempt this"
-        beats three different half-working attempts, and it costs nothing for AT users
-        on touch, who already get the accessible name directly on tap regardless.
+        toolbar's tooltip doesn't try to run on touch at all — an honest "doesn't
+        attempt this" beats three different half-working attempts, and it costs
+        nothing for AT users on touch, who already get the accessible name directly on
+        tap regardless.
       </li>
     </ul>
 

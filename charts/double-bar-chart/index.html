@@ -488,10 +488,11 @@
       </li>
       <li>
         <strong>Hover/focus tooltips left running on touch, unmodified</strong> — same
-        failure as the Stacked Bar Chart's toolbar (see that page's "Common failure
-        patterns" for the three distinct broken behaviors this actually produced), same
-        fix: suppressed outright under <code>(hover: none), (pointer: coarse)</code>
-        rather than patched per symptom.
+        failure as the Stacked Bar Chart's toolbar specifically, not its chart's own
+        data-point tooltip (see that page's "Common failure patterns" for the three
+        distinct broken behaviors this actually produced), same fix: only the
+        toolbar's tooltip instance is suppressed, under <code>(hover: none), (pointer:
+        coarse)</code>, rather than patched per symptom.
       </li>
     </ul>
 
@@ -506,12 +507,15 @@
       document order regardless of <code>tabindex</code> (60 stops here, not 180 —
       still a real cost, just a smaller one than the Stacked Bar Chart's); there's no
       distinct visual "focused/selected" state beyond the default focus ring, which
-      isn't generally shown for touch taps at all; and the hover/focus tooltip is
-      suppressed outright on touch (<code>(hover: none), (pointer: coarse)</code> in
-      <code>chart.css</code>) rather than left to run, since one tap collapses "hover"
-      and "click" into a single gesture and produced three different broken behaviors
-      on this toolbar's own three buttons before it was suppressed — see the Stacked
-      Bar Chart's "Mobile / touch equivalent" for exactly what each one looked like.
+      isn't generally shown for touch taps at all (the chart's own data-point tooltip
+      still shows on tap, unaffected by any of this); and the <em>toolbar's</em>
+      hover/focus tooltip specifically is suppressed outright on touch
+      (<code>.chart-toolbar .chart-tooltip</code> under <code>(hover: none), (pointer:
+      coarse)</code> in <code>chart.css</code>) rather than left to run, since one tap
+      collapses "hover" and "click" into a single gesture and produced three different
+      broken behaviors on this toolbar's own three buttons before it was suppressed —
+      see the Stacked Bar Chart's "Mobile / touch equivalent" for exactly what each one
+      looked like.
     </p>
 
     <h2>Library notes</h2>
