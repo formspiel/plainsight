@@ -39,6 +39,18 @@ a:visited {
   color: var(--link-visited);
 }
 
+/* A <summary> is interactive the same way a link is, so it gets the
+   same --link color globally -- but never an underline, even on
+   hover/focus. The underline's presence (link) vs. absence (summary) is
+   the one remaining differentiator between "this navigates" and "this
+   opens/closes something," now that both share a color. Elements that
+   need a neutral (non-link) color regardless of tag -- e.g. the chart
+   toolbar's icon-only buttons, see .toolbar-btn in chart.css -- override
+   this with their own higher-specificity class rule. */
+summary {
+  color: var(--link);
+}
+
 p {
   max-width: 68ch;
 }
@@ -191,12 +203,6 @@ pre {
   position: relative;
 }
 
-/* Deliberately NOT --link colored and NOT underlined, even on
-   hover/focus -- a summary isn't a link, and the underline's presence
-   (link) vs. absence (summary) is itself a second, small but noticeable
-   differentiator on top of the caret (see .nav-caret below), the same
-   way real links elsewhere on the page are underlined and plain text
-   isn't. Focus is still visible via the global :focus-visible ring. */
 .site-nav summary {
   cursor: pointer;
   font-weight: 600;
