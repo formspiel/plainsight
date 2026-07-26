@@ -10,6 +10,23 @@
     }
   },
   "urls": [
-    "http://localhost:8080/charts/stacked-bar-chart/index.html"
+    "http://localhost:8080/index.html",
+    "http://localhost:8080/getting-started/index.html",
+    "http://localhost:8080/audit-checklist/index.html",
+    "http://localhost:8080/verified-against/index.html",
+    "http://localhost:8080/charts/stacked-bar-chart/index.html",
+    "http://localhost:8080/charts/double-bar-chart/index.html",
+    "http://localhost:8080/charts/donut-pie-chart/index.html",
+    "http://localhost:8080/charts/multi-series-line-chart/index.html",
+    "http://localhost:8080/charts/likert-scale-chart/index.html",
+    "http://localhost:8080/patterns/color-encoding/index.html",
+    "http://localhost:8080/patterns/tooltips/index.html",
+    "http://localhost:8080/patterns/live-data/index.html",
+    "http://localhost:8080/patterns/legends-as-filters/index.html",
+    "http://localhost:8080/patterns/zoom-pan-drilldown/index.html",
+    "http://localhost:8080/patterns/navigation-at-scale/index.html",
+    "http://localhost:8080/patterns/reflow-zoom/index.html",
+    "http://localhost:8080/patterns/canvas-vs-svg/index.html",
+    "http://localhost:8080/patterns/motion/index.html"
   ]
 }

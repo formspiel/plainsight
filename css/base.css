@@ -85,14 +85,6 @@ pre {
   outline-offset: 2px;
 }
 
-/* Non-focus-visible browsers / elements that need an always-on ring
-   (e.g. our custom chart point roving-tabindex targets) opt in with
-   this class instead of relying on :focus alone. */
-.focus-ring:focus {
-  outline: 3px solid var(--focus-ring);
-  outline-offset: 2px;
-}
-
 .visually-hidden {
   position: absolute;
   width: 1px;

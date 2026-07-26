@@ -30,8 +30,8 @@ jobs:
 
       # Errors-only by config (.pa11yci): includeWarnings/includeNotices are
       # both off, so a passing run here means zero WCAG2AA errors, not zero
-      # findings of any kind. Runs against the Stacked Bar Chart page only
-      # for now -- add more URLs to .pa11yci as chart pages ship.
+      # findings of any kind. Covers every page currently in the site --
+      # add new URLs to .pa11yci as pages ship.
       - name: Run Pa11y CI
         id: pa11y
         continue-on-error: true
