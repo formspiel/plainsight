@@ -180,6 +180,7 @@
       </div>
 
       <div id="stacked-bar-legend"></div>
+      <div id="stacked-bar-legend-status" class="visually-hidden" aria-live="polite"></div>
 
       <details class="chart-longdesc">
         <summary>Long description <span class="nav-caret" aria-hidden="true">▾</span></summary>
@@ -323,10 +324,16 @@
             <td>n/a — expanded content is the description itself</td>
           </tr>
           <tr>
-            <td>Legend</td>
-            <td>Plain list (<code>ul</code>/<code>li</code>)</td>
-            <td>n/a — static text + swatch, not interactive</td>
+            <td>Legend entry (one per series)</td>
+            <td><code>button</code> (native), toggle series visibility via <code>aria-pressed</code></td>
+            <td>Text content: the series name (e.g. "Auto Collision") — the swatch is <code>aria-hidden</code> and contributes nothing, <code>aria-pressed</code> alone carries the shown/hidden state, same idiom as "Toggle patterns" above</td>
+            <td>None — state is on the element itself via <code>aria-pressed</code>, not a separate description. When only one series remains visible, its own button gets <code>aria-disabled="true"</code> (not the <code>disabled</code> attribute) so it stays reachable and is announced as unavailable, rather than silently dropping out of the tab order — hiding the last visible series would leave the chart showing nothing at all</td>
+          </tr>
+          <tr>
+            <td>Legend status region</td>
+            <td><code>aria-live="polite"</code>, visually hidden</td>
             <td>n/a</td>
+            <td>Announces what just changed on every toggle ("Auto Collision hidden." / "Auto Collision shown.") — needed because hiding a series changes every other segment's hotspot text (see Keyboard pattern below) without moving focus anywhere to trigger a fresh announcement on its own</td>
           </tr>
           <tr>
             <td>Data table fallback</td>
@@ -360,14 +367,34 @@
           <tr><th scope="row">Shift+Tab</th><td>Moves focus out of the chart, backward.</td></tr>
           <tr><th scope="row">Right Arrow</th><td>Moves to the next month, staying at the same level (bar summary stays on bar summary; a given category stays on that category).</td></tr>
           <tr><th scope="row">Left Arrow</th><td>Moves to the previous month, same level.</td></tr>
-          <tr><th scope="row">Down Arrow</th><td>From the bar summary: enters the stack at its topmost segment. From a segment: moves down, toward the base.</td></tr>
-          <tr><th scope="row">Up Arrow</th><td>From a segment: moves up, toward the top of the stack. From the topmost segment: exits back to the bar summary.</td></tr>
+          <tr><th scope="row">Down Arrow</th><td>From the bar summary: enters the stack at its topmost <em>visible</em> segment. From a segment: moves down, toward the base. A series hidden via the legend has no stop here at all — there's nothing to skip over, because it was never placed there to begin with (see "Legend as a filter" below).</td></tr>
+          <tr><th scope="row">Up Arrow</th><td>From a segment: moves up, toward the top of the stack of currently-visible segments. From the topmost visible segment: exits back to the bar summary.</td></tr>
           <tr><th scope="row">Home</th><td>Jumps to the first month (January 2023), same level.</td></tr>
           <tr><th scope="row">End</th><td>Jumps to the last month (June 2025), same level.</td></tr>
           <tr><th scope="row">Escape</th><td>From a segment, jumps directly back to that month's bar summary.</td></tr>
+          <tr><th scope="row">Tab / Enter or Space</th><td>Each legend entry is its own standalone Tab stop (not part of the chart's roving group) — Enter or Space toggles it, same as any native button.</td></tr>
         </tbody>
       </table>
     </div>
+
+    <h2>Legend as a filter</h2>
+    <p>
+      Clicking (or Enter/Space-activating) a legend entry hides that series everywhere:
+      the bar segments close the gap and re-stack, each bar's own total shrinks to the
+      sum of whatever's still visible, and the hidden series' hotspot doesn't exist in
+      the DOM at all — keyboard navigation has nothing to skip over because there's
+      nothing there, not a present-but-excluded stop. A live region (visually hidden)
+      announces what changed on every toggle, since hiding a series changes every other
+      segment's own text without moving focus anywhere to trigger a fresh announcement
+      on its own. The one series remaining visible, if every other one is hidden,
+      can't be turned off — its button gets <code>aria-disabled</code> rather than
+      disappearing from the tab order, so the chart can never end up showing nothing at
+      all. The data table fallback is deliberately <strong>not</strong> affected by this
+      — it stays a complete, independent view of every category's exact values
+      regardless of what's currently toggled in the chart, per this project's own
+      thesis that the table is a genuine parallel option, not something that should
+      depend on the chart's display state.
+    </p>
 
     <h2>Screen reader behavior</h2>
     <p>
@@ -381,6 +408,14 @@
       visible on screen now (see the hint above the chart in the Live demo), not just
       exposed to AT — a sighted keyboard user has no other way to discover that arrow
       keys do anything here.
+    </p>
+    <p>
+      Toggling a legend entry doesn't move focus anywhere (focus stays on the legend
+      button itself), so there's no fresh button-focus announcement to carry the news
+      that every other segment's value/percentage just changed. The visually-hidden
+      <code>aria-live="polite"</code> region (see "Expected accessibility tree" above)
+      exists specifically to cover that gap — it's the one place on this page an
+      announcement is triggered by something other than focus movement.
     </p>
     <p>
       The floating tooltip that appears on hover and keyboard focus is
@@ -506,6 +541,19 @@
         one level of interactive detail in the same visual space. (WCAG 2.1.1 Keyboard
         is not violated here since keyboard access exists — this is a pointer-specific
         gap with no WCAG success criterion of its own, just a real usability failure.)
+      </li>
+      <li>
+        <strong>An interactive legend that only changes color, not keyboard/SR
+        reachability</strong> — a common shortcut: dim a series' color when its legend
+        entry is clicked, but leave its segment's hotspot/DOM node exactly where it was.
+        A sighted mouse user sees it "hidden"; a keyboard or screen reader user still
+        lands on a stop describing a segment that, visually, no longer exists —
+        confusing at best, actively wrong if the announced percentage/total still
+        assumes it's part of the stack. This demo's legend toggle actually removes the
+        segment's hotspot from the DOM entirely when hidden (see "Legend as a filter"
+        above), so keyboard nav has nothing stale to land on and every other segment's
+        own total updates to match what's actually shown. (WCAG 4.1.2 Name, Role,
+        Value — the state a sighted user sees and the state AT exposes must match)
       </li>
     </ul>
 

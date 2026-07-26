@@ -45,16 +45,30 @@ function xForIndex(index) {
   return MARGIN.left + index * bandwidth + (bandwidth - barWidth) / 2;
 }
 
-// Cumulative stack per month, bottom-up, in seriesNames order.
-const stacks = stackedBarData.map(({ month, values }) => {
-  let cumulative = 0;
-  const segments = values.map((value, seriesIndex) => {
-    const start = cumulative;
-    cumulative += value;
-    return { seriesIndex, value, start, end: cumulative };
+// Cumulative stack per month, bottom-up, in seriesNames order. A hidden
+// series (see the legend's interactive toggle further down) is simply
+// left out of the sum entirely -- segments above it close the gap and
+// the bar's own total shrinks to match what's actually visible, rather
+// than leaving a blank gap at the original height. `stacks` is
+// recomputed on every legend toggle, not just once at load, so it's a
+// `let`, not a `const`.
+let hiddenSeries = new Set();
+
+function computeStacks() {
+  return stackedBarData.map(({ month, values }) => {
+    let cumulative = 0;
+    const segments = [];
+    values.forEach((value, seriesIndex) => {
+      if (hiddenSeries.has(seriesIndex)) return;
+      const start = cumulative;
+      cumulative += value;
+      segments.push({ seriesIndex, value, start, end: cumulative });
+    });
+    return { month, total: cumulative, segments };
   });
-  return { month, total: cumulative, segments };
-});
+}
+
+let stacks = computeStacks();
 
 function svgEl(name, attrs = {}) {
   const el = document.createElementNS(SVG_NS, name);
@@ -213,8 +227,28 @@ function renderChart(container) {
     "aria-hidden": "true",
     focusable: "false",
   });
+  // buildAxes() doesn't depend on which series are hidden (Y_MAX is a
+  // fixed constant, and the month labels only read stack.month, never
+  // segments/total) so it's built once here and never rebuilt -- only
+  // .chart-bars needs replacing when the legend toggles a series, via
+  // updateBars() below.
   svg.append(buildPatternDefs(), buildAxes(), buildBars());
   container.append(svg);
+  return svg;
+}
+
+// Called after a legend toggle changes `stacks` -- replaces just the
+// bars, leaving defs/axes untouched. Re-triggers the existing entrance
+// animation (see .chart-bar-group in chart.css) as a side effect, since
+// every bar is a freshly-created element again -- a visible "this
+// changed" cue for sighted users, already suppressed under
+// prefers-reduced-motion like the initial entrance. Under reduced
+// motion the bars just resize instantly with no equivalent cue -- the
+// same open question CLAUDE.md's Motion backlog item already flags for
+// value changes in general, not something newly solved here.
+function updateBars(svg) {
+  const oldBars = svg.querySelector(".chart-bars");
+  oldBars.replaceWith(buildBars());
 }
 
 // ---------------------------------------------------------------------
@@ -274,6 +308,22 @@ function buildHotspotLayer(container) {
   layer.setAttribute("aria-labelledby", "stacked-bar-title");
   layer.setAttribute("aria-describedby", "stacked-bar-instructions");
 
+  container.append(layer);
+  populateHotspots(layer);
+  return layer;
+}
+
+// Split out from buildHotspotLayer so a legend toggle can rebuild just
+// the hotspot buttons (via the same `layer` element, whose event
+// listeners -- see wireKeyboardNav/wireTooltip below -- are delegated
+// from `layer` itself, not attached per-button, so they survive this
+// without needing to be re-wired). A hidden series simply has no
+// hotspot at all after this runs -- there's nothing for keyboard
+// navigation to skip over, because it was never placed there to begin
+// with, not a segment that's present but excluded from tab order.
+function populateHotspots(layer) {
+  layer.innerHTML = "";
+
   stacks.forEach((stack, barIndex) => {
     const x = xForIndex(barIndex);
 
@@ -303,9 +353,6 @@ function buildHotspotLayer(container) {
       );
     });
   });
-
-  container.append(layer);
-  return layer;
 }
 
 function levelKey(level) {
@@ -319,7 +366,6 @@ function findHotspot(layer, barIndex, level) {
 }
 
 function wireKeyboardNav(layer) {
-  const seriesCount = seriesNames.length;
   let current = layer.querySelector('.hotspot[data-bar-index="0"][data-level="bar"]');
   current.tabIndex = 0;
 
@@ -335,6 +381,12 @@ function wireKeyboardNav(layer) {
   layer.addEventListener("keydown", (event) => {
     const barIndex = Number(current.dataset.barIndex);
     const level = current.dataset.level === "bar" ? "bar" : Number(current.dataset.level);
+    // stack.segments only ever contains *visible* series (see
+    // computeStacks) -- moving by position in this array, rather than
+    // by raw seriesIndex +/- 1, is what makes Up/Down skip a hidden
+    // series automatically: there's simply no gap in the array for
+    // keyboard nav to trip over, the same way there's no hotspot for it.
+    const segs = stacks[barIndex].segments;
 
     switch (event.key) {
       case "ArrowRight":
@@ -347,17 +399,25 @@ function wireKeyboardNav(layer) {
         break;
       case "ArrowDown":
         // Down = move down the visual stack: from the bar summary into
-        // the topmost segment, then down toward the base.
-        if (level === "bar") moveTo(barIndex, seriesCount - 1);
-        else if (level > 0) moveTo(barIndex, level - 1);
+        // the topmost (last) visible segment, then down toward the base.
+        if (level === "bar") {
+          if (segs.length) moveTo(barIndex, segs[segs.length - 1].seriesIndex);
+        } else {
+          const idx = segs.findIndex((s) => s.seriesIndex === level);
+          if (idx > 0) moveTo(barIndex, segs[idx - 1].seriesIndex);
+        }
         event.preventDefault();
         break;
-      case "ArrowUp":
+      case "ArrowUp": {
         // Up = move up the visual stack, then back out to the bar summary.
-        if (level !== "bar" && level < seriesCount - 1) moveTo(barIndex, level + 1);
-        else if (level !== "bar") moveTo(barIndex, "bar");
+        if (level !== "bar") {
+          const idx = segs.findIndex((s) => s.seriesIndex === level);
+          if (idx < segs.length - 1) moveTo(barIndex, segs[idx + 1].seriesIndex);
+          else moveTo(barIndex, "bar");
+        }
         event.preventDefault();
         break;
+      }
       case "Home":
         moveTo(0, level);
         event.preventDefault();
@@ -373,6 +433,32 @@ function wireKeyboardNav(layer) {
         break;
     }
   });
+
+  // Called after a legend toggle rebuilds the hotspot layer's contents
+  // (populateHotspots) -- `current` is now a detached node (its own
+  // dataset is still readable even though it's no longer in the
+  // document), so this reads its old position, falls back to the bar
+  // summary if that exact segment is now hidden, and restores roving
+  // tabindex to the equivalent still-present hotspot. Doesn't move
+  // focus itself: a legend toggle is triggered from the legend, a
+  // separate widget, so focus has no reason to jump into the chart --
+  // this only keeps the *next* Tab-in landing somewhere sensible.
+  function restoreAfterRebuild() {
+    const barIndex = Number(current.dataset.barIndex);
+    const rawLevel = current.dataset.level === "bar" ? "bar" : Number(current.dataset.level);
+    const level =
+      rawLevel !== "bar" && !stacks[barIndex].segments.some((s) => s.seriesIndex === rawLevel)
+        ? "bar"
+        : rawLevel;
+
+    const restored =
+      findHotspot(layer, barIndex, level) ||
+      layer.querySelector('.hotspot[data-bar-index="0"][data-level="bar"]');
+    restored.tabIndex = 0;
+    current = restored;
+  }
+
+  return { restoreAfterRebuild };
 }
 
 // ---------------------------------------------------------------------
@@ -578,8 +664,15 @@ function wireKeyboardPanel(details, demoRoot, toolbarTooltip) {
 }
 
 // ---------------------------------------------------------------------
-// Legend (static key, not an interactive filter -- see the "Legends as
-// filters" cross-cutting page, not yet built, for the interactive case).
+// Legend as an interactive filter -- see the "Legends as filters"
+// cross-cutting page. Each entry is a real <button aria-pressed>, not a
+// styled <li>: toggling it hides/shows that series everywhere (chart
+// AND its own keyboard nav -- see computeStacks/populateHotspots/
+// wireKeyboardNav above), announces the change via a live region
+// (onToggle, wired in the init block below), and the data table
+// fallback is deliberately left untouched by this -- it stays a
+// complete, independent view of every category regardless of what's
+// currently toggled in the chart (see "Data table fallback" below).
 // ---------------------------------------------------------------------
 
 function renderLegend(container) {
@@ -588,15 +681,90 @@ function renderLegend(container) {
 
   seriesNames.forEach((name, i) => {
     const item = document.createElement("li");
+
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "chart-legend__toggle";
+    button.setAttribute("aria-pressed", "true");
+    button.dataset.seriesIndex = String(i);
+    // aria-pressed alone tells AT users the state ("Auto Collision,
+    // pressed" / "not pressed") -- same idiom as the toolbar's "Toggle
+    // patterns" button elsewhere on this page, not a second name change.
+    // Click behavior is wired separately, see wireLegendToggling below --
+    // kept apart the same way buildHotspotLayer/wireKeyboardNav are,
+    // structure here, behavior there.
+
     const swatch = document.createElement("span");
     swatch.className = "chart-legend__swatch";
+    swatch.setAttribute("aria-hidden", "true");
     swatch.dataset.pattern = String(i + 1);
     swatch.style.setProperty("--swatch-color", `var(--series-${i + 1})`);
-    item.append(swatch, document.createTextNode(name));
+
+    // A real element, not a bare text node, specifically so the
+    // "hidden" state (see chart.css) can strike through just the label
+    // without a line also being drawn across the swatch next to it.
+    const label = document.createElement("span");
+    label.className = "chart-legend__label";
+    label.textContent = name;
+
+    button.append(swatch, label);
+    item.append(button);
     list.append(item);
   });
 
   container.append(list);
+  return list;
+}
+
+// Attaches click behavior to the buttons renderLegend already built,
+// and ties a click to everything it needs to update: the hidden-set,
+// the chart itself, keyboard nav's roving-tabindex bookkeeping, every
+// legend button's own aria-pressed/aria-disabled, and a live-region
+// announcement of what changed. Kept as one function (rather than
+// scattering these across several small handlers) so the full set of
+// side effects a single toggle causes is visible in one place.
+function wireLegendToggling({ legendList, svg, hotspotLayer, keyboardNav, statusRegion }) {
+  const buttons = Array.from(legendList.querySelectorAll(".chart-legend__toggle"));
+
+  function refreshButtonStates() {
+    const visibleCount = seriesNames.length - hiddenSeries.size;
+    buttons.forEach((btn, i) => {
+      const shown = !hiddenSeries.has(i);
+      btn.setAttribute("aria-pressed", String(shown));
+      // aria-disabled, not the disabled attribute: the one remaining
+      // visible series' button stays focusable and is announced as
+      // unavailable, rather than silently dropping out of the tab
+      // order -- see the click handler below, which checks this
+      // attribute before doing anything else.
+      btn.setAttribute("aria-disabled", String(shown && visibleCount === 1));
+    });
+  }
+
+  function handleToggle(seriesIndex) {
+    const wasVisible = !hiddenSeries.has(seriesIndex);
+    const visibleCount = seriesNames.length - hiddenSeries.size;
+    if (wasVisible && visibleCount === 1) return;
+
+    if (wasVisible) hiddenSeries.add(seriesIndex);
+    else hiddenSeries.delete(seriesIndex);
+
+    stacks = computeStacks();
+    updateBars(svg);
+    populateHotspots(hotspotLayer);
+    keyboardNav.restoreAfterRebuild();
+    refreshButtonStates();
+
+    if (statusRegion) {
+      statusRegion.textContent = `${seriesNames[seriesIndex]} ${wasVisible ? "hidden" : "shown"}.`;
+    }
+  }
+
+  buttons.forEach((btn, i) => {
+    btn.addEventListener("click", () => {
+      if (btn.getAttribute("aria-disabled") === "true") return;
+      handleToggle(i);
+    });
+  });
 }
 
 // ---------------------------------------------------------------------
@@ -681,12 +849,15 @@ function renderDataTable(container) {
 document.addEventListener("DOMContentLoaded", () => {
   const scrollContainer = document.getElementById("stacked-bar-chart");
   const chartCanvas = scrollContainer?.querySelector(".chart-canvas");
+  let svg = null;
+  let hotspotLayer = null;
+  let keyboardNav = null;
   if (chartCanvas) {
-    renderChart(chartCanvas);
-    const layer = buildHotspotLayer(chartCanvas);
-    wireKeyboardNav(layer);
+    svg = renderChart(chartCanvas);
+    hotspotLayer = buildHotspotLayer(chartCanvas);
+    keyboardNav = wireKeyboardNav(hotspotLayer);
     const tooltip = buildTooltip(chartCanvas, scrollContainer);
-    wireTooltip(layer, tooltip);
+    wireTooltip(hotspotLayer, tooltip);
   }
 
   const chartFigure = document.querySelector(".chart-figure");
@@ -714,7 +885,18 @@ document.addEventListener("DOMContentLoaded", () => {
   makeDetailsDismissible(keyboardDetails);
 
   const legendContainer = document.getElementById("stacked-bar-legend");
-  if (legendContainer) renderLegend(legendContainer);
+  if (legendContainer) {
+    const legendList = renderLegend(legendContainer);
+    if (svg && hotspotLayer && keyboardNav) {
+      wireLegendToggling({
+        legendList,
+        svg,
+        hotspotLayer,
+        keyboardNav,
+        statusRegion: document.getElementById("stacked-bar-legend-status"),
+      });
+    }
+  }
 
   const tableContainer = document.getElementById("stacked-bar-table-wrapper");
   if (tableContainer) renderDataTable(tableContainer);

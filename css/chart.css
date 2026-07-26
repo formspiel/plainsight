@@ -403,8 +403,44 @@ button.toolbar-btn[aria-pressed="true"] {
 
 .chart-legend li {
   display: flex;
+}
+
+/* Reset to look like the plain swatch+label row this replaces, but it's
+   a real <button aria-pressed> now -- see wireLegendToggling in
+   script.js. Focus is already visible via the global :focus-visible
+   ring, no extra rule needed here. */
+.chart-legend__toggle {
+  display: inline-flex;
   align-items: center;
   gap: 0.5rem;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+/* Hidden state: opacity alone would read as barely-there once
+   forced-colors flattens everything toward a small system palette (the
+   swatch's own color is already flattened there regardless) -- the
+   line-through on the label is a real shape, not a color, so it's the
+   part that actually still signals "hidden" when it matters most. */
+.chart-legend__toggle[aria-pressed="false"] {
+  opacity: 0.5;
+}
+
+.chart-legend__toggle[aria-pressed="false"] .chart-legend__label {
+  text-decoration: line-through;
+}
+
+/* The one series still visible when everything else is hidden: stays
+   focusable and announced (aria-disabled, not the disabled attribute --
+   see script.js), just not operable, so hiding it can't ever leave the
+   chart with nothing shown at all. */
+.chart-legend__toggle[aria-disabled="true"] {
+  cursor: not-allowed;
 }
 
 /* Swatch backgrounds mirror the five SVG <pattern> fills used on the chart
