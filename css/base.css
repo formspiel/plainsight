@@ -93,6 +93,18 @@ pre {
   border: 0;
 }
 
+/* Wraps multiple skip links (e.g. a page with both "Skip to content" and
+   a "Skip [some large embedded widget]" link) as a real list -- plain
+   reset, no visual list styling. Each .skip-link is independently
+   off-screen until focused, so it doesn't matter that this stacks them
+   at the same position: only one is ever focused, hence visible, at a
+   time. A page with only one skip link doesn't need this wrapper. */
+.skip-links {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
 .skip-link {
   position: absolute;
   left: 0.5rem;
@@ -152,29 +164,13 @@ pre {
   padding: 0;
 }
 
-/* Same color as plain body text, not the usual --link color -- the only
-   signifier for "this one opens a dropdown, this one navigates directly"
-   is the caret (see .nav-caret below). Mixing link-purple and plain-text
-   items in one row read as two unrelated colors doing the same job the
-   caret already does on its own. */
-.site-nav a,
-.site-nav a:visited {
-  color: var(--text);
-}
-
 .site-nav a {
-  text-decoration: none;
+  text-decoration: underline;
   font-weight: 600;
   font-size: 0.95rem;
 }
 
-.site-nav a:hover,
-.site-nav a:focus-visible {
-  text-decoration: underline;
-}
-
 .site-nav a[aria-current="page"] {
-  text-decoration: underline;
   text-decoration-thickness: 2px;
   text-underline-offset: 3px;
 }
@@ -183,6 +179,12 @@ pre {
   position: relative;
 }
 
+/* Deliberately NOT --link colored and NOT underlined, even on
+   hover/focus -- a summary isn't a link, and the underline's presence
+   (link) vs. absence (summary) is itself a second, small but noticeable
+   differentiator on top of the caret (see .nav-caret below), the same
+   way real links elsewhere on the page are underlined and plain text
+   isn't. Focus is still visible via the global :focus-visible ring. */
 .site-nav summary {
   cursor: pointer;
   font-weight: 600;
@@ -190,20 +192,16 @@ pre {
   list-style: none;
 }
 
-.site-nav summary:hover,
-.site-nav summary:focus-visible {
-  text-decoration: underline;
-}
-
 .site-nav summary::-webkit-details-marker {
   display: none;
 }
 
 /* A real element, not a ::after glyph, specifically so it can carry its
-   own size and color independent of the summary's own text -- it's the
-   sole signifier that this nav item opens a dropdown (see the color
-   note on .site-nav a above), so it needs to actually read as bigger,
-   not just be present. Colored with the dark-mode-specific forest tint
+   own size and color independent of the summary's own text -- it's a
+   second signifier that this nav item opens a dropdown, alongside the
+   underline/no-underline distinction above, so it needs to actually
+   read as bigger, not just be present. Colored with the dark-mode-
+   specific forest tint
    (not --accent) because --accent is deliberately held constant for
    button fills (see tokens.css) and only clears ~3.2:1 against the dark
    surface -- fine for a button, tight for this. */
