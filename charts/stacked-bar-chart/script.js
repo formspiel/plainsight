@@ -226,7 +226,15 @@ function renderChart(container) {
 
 function segmentDescription(stack, segment) {
   const pct = Math.round((segment.value / stack.total) * 100);
-  return `${formatMonth(stack.month)}, ${seriesNames[segment.seriesIndex]}: ${segment.value} claims, ${pct}% of this month's total.`;
+  // Includes the month's actual total, not just the percentage -- a
+  // mouse/touch user has no way to reach the separate bar-summary stop
+  // below (its hit area is fully covered by the segment hotspots
+  // stacked on top of it, confirmed via elementFromPoint at several
+  // points inside its bounding box: a segment button is topmost
+  // everywhere), so this is the only way they see the total at all.
+  // Keyboard/SR users still get the bar-summary stop as its own stop
+  // too -- this is additive for them, not a replacement.
+  return `${formatMonth(stack.month)}, ${seriesNames[segment.seriesIndex]}: ${segment.value} claims, ${pct}% of this month's total of ${stack.total} claims.`;
 }
 
 function barDescription(stack) {

@@ -283,7 +283,7 @@
           <tr>
             <td>Segment stop (one per category per month)</td>
             <td><code>button</code> (native)</td>
-            <td>Text content: "January 2023, Auto Collision: 24 claims, 41% of this month's total."</td>
+            <td>Text content: "January 2023, Auto Collision: 24 claims, 41% of this month's total of 58 claims." — the actual total, not just the percentage, is included specifically because a mouse/touch user has no way to reach the bar summary stop above (its hit area is fully covered by the segment hotspots — see "Common failure patterns" below)</td>
             <td>None — name is self-contained</td>
           </tr>
           <tr>
@@ -489,6 +489,23 @@
         gap worth checking for specifically, since a chart that "looks fine" on a
         desktop screenshot during an audit can fail this silently on mobile. (WCAG
         1.4.10 Reflow)
+      </li>
+      <li>
+        <strong>A layered hit-target model can make one layer unreachable by pointer
+        entirely</strong> — found in this very demo: each bar has a "total" hotspot
+        stacked underneath its per-segment hotspots, but the segments' combined hit
+        areas exactly cover the total hotspot's own area, so a mouse click or a touch
+        tap anywhere on a bar always lands on a segment, never the total (confirmed via
+        <code>elementFromPoint</code> at multiple points inside the total hotspot's own
+        bounding box — a segment button was topmost every time). Keyboard and screen
+        reader users don't hit this, since the total is still its own explicit stop in
+        the roving-tabindex sequence; mouse/touch users had no equivalent at all until
+        each segment's own text was extended to include the month's actual total, not
+        just its percentage share (see the Segment stop row in "Expected accessibility
+        tree" above). Worth checking for specifically whenever a chart nests more than
+        one level of interactive detail in the same visual space. (WCAG 2.1.1 Keyboard
+        is not violated here since keyboard access exists — this is a pointer-specific
+        gap with no WCAG success criterion of its own, just a real usability failure.)
       </li>
     </ul>
 
