@@ -345,8 +345,15 @@ pre {
   margin: 1.5rem 0;
 }
 
+/* height: 100% -- .card-grid's actual grid items are the <li>s, which
+   already stretch to match the tallest card in their row (grid's
+   default align-items: stretch); without this, only the <li> stretched
+   and this inner <a> stayed sized to its own content, so cards in the
+   same row could still render at different visible heights depending
+   on how much their description text wrapped. */
 .card {
   display: block;
+  height: 100%;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 6px;
@@ -358,6 +365,15 @@ pre {
 .card:hover,
 .card:focus-visible {
   border-color: var(--accent);
+}
+
+/* Scoped to the card context specifically: the badge is a bare <span>
+   here (no margin of its own), unlike the <p class="badge"> used on a
+   chart's own stub page, which already gets normal paragraph spacing --
+   adding margin there too would double it up. */
+.card .badge {
+  display: inline-block;
+  margin-bottom: 0.6rem;
 }
 
 .card h3 {
