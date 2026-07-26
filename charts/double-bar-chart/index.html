@@ -4,14 +4,18 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Double Bar Graph — Plainsight</title>
-  <meta name="description" content="Diverging, mirrored-axis bars — values plotted either side of a center line rather than anchored to a shared edge. Not yet built." />
+  <meta name="description" content="Expected keyboard operation and screen reader behavior for diverging, mirrored-axis bar charts." />
   <link rel="icon" href="../../favicon.svg" type="image/svg+xml" />
   <link rel="icon" href="../../favicon-32.png" sizes="32x32" type="image/png" />
   <link rel="stylesheet" href="../../css/tokens.css" />
   <link rel="stylesheet" href="../../css/base.css" />
+  <link rel="stylesheet" href="../../css/chart.css" />
 </head>
 <body>
-  <a class="skip-link" href="#main">Skip to content</a>
+  <ul class="skip-links">
+    <li><a class="skip-link" href="#main">Skip to content</a></li>
+    <li><a class="skip-link" href="#double-bar-title">Skip to chart</a></li>
+  </ul>
 
   <header class="site-header">
     <div class="site-header__inner">
@@ -63,14 +67,461 @@
         <li><a href="" aria-current="page">Double Bar Graph</a></li>
       </ol>
     </nav>
+
     <h1>Double Bar Graph</h1>
-    <p class="badge">Coming soon</p>
-    <p class="page-intro">Diverging, mirrored-axis bars — values plotted either side of a center line rather than anchored to a shared edge. Not yet built.</p>
+    <p class="page-intro">
+      Diverging, mirrored-axis bars — values plotted either side of a shared zero line,
+      rather than all anchored to a common edge. Good for two opposing counts per
+      category, where seeing both the size of each side and the balance between them
+      matters.
+    </p>
+
+    <h2>Live demo</h2>
+    <p>
+      30 months of fictional insurance claims data: claims approved (above the line)
+      versus denied (below it). Tab into the chart, then use the arrow keys described
+      below.
+    </p>
+
+    <div id="double-bar-demo" class="chart-demo">
+      <div class="chart-header">
+        <h3 id="double-bar-title" tabindex="-1">
+          <span id="double-bar-chart-type" class="visually-hidden">Double bar graph: </span>
+          Monthly Insurance Claims, Approved vs. Denied, January 2023–June 2025
+        </h3>
+
+        <div class="chart-toolbar" role="group" aria-label="Chart options">
+          <button
+            type="button"
+            id="double-bar-pattern-toggle"
+            class="toolbar-btn pattern-toggle"
+            aria-pressed="false"
+            aria-label="Toggle patterns"
+            data-tooltip="Toggle patterns"
+          >
+            <svg class="toolbar-btn__icon" viewBox="0 0 20 20" aria-hidden="true">
+              <rect x="3" y="3" width="14" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="1.5" />
+              <path d="M3 10 L10 3 M3 15 L15 3 M8 17 L17 8 M13 17 L17 13" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+            </svg>
+          </button>
+
+          <details class="keyboard-details">
+            <summary class="toolbar-btn" aria-label="Open keyboard shortcuts" data-tooltip="Open keyboard shortcuts">
+              <svg class="toolbar-btn__icon" viewBox="0 0 20 20" aria-hidden="true">
+                <rect x="2" y="5" width="16" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="1.5" />
+                <rect x="4.5" y="7.5" width="1.6" height="1.6" fill="currentColor" />
+                <rect x="7.5" y="7.5" width="1.6" height="1.6" fill="currentColor" />
+                <rect x="10.5" y="7.5" width="1.6" height="1.6" fill="currentColor" />
+                <rect x="13.5" y="7.5" width="1.6" height="1.6" fill="currentColor" />
+                <rect x="4.5" y="10.5" width="9" height="1.6" fill="currentColor" />
+              </svg>
+            </summary>
+            <div class="keyboard-panel">
+              <table>
+                <caption class="visually-hidden">Full keyboard shortcut reference</caption>
+                <tbody>
+                  <tr><th scope="row"><kbd>←</kbd>/<kbd>→</kbd></th><td>Move between months</td></tr>
+                  <tr><th scope="row"><kbd>↑</kbd></th><td>Jump to Approved, this month</td></tr>
+                  <tr><th scope="row"><kbd>↓</kbd></th><td>Jump to Denied, this month</td></tr>
+                  <tr><th scope="row"><kbd>Home</kbd>/<kbd>End</kbd></th><td>Jump to the first/last month</td></tr>
+                  <tr><th scope="row"><kbd>Tab</kbd></th><td>Enter the chart, then leave it entirely (one Tab stop)</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </details>
+
+          <a class="toolbar-btn" href="data.csv" download aria-label="Download CSV" data-tooltip="Download CSV">
+            <svg class="toolbar-btn__icon" viewBox="0 0 20 20" aria-hidden="true">
+              <path d="M10 2.5 V12.5 M6 9 L10 13 L14 9" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+              <path d="M3.5 14.5 V16 a1 1 0 0 0 1 1 h11 a1 1 0 0 0 1 -1 v-1.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </a>
+        </div>
+      </div>
+
+      <span id="double-bar-instructions" class="visually-hidden">
+        Interactive chart with 30 months of data. Use Left and Right arrow keys to move
+        between months, Up arrow for Approved, Down arrow for Denied, Home and End to
+        jump to the first or last month. See the Open keyboard shortcuts button above
+        for the full reference.
+      </span>
+
+      <div class="chart-figure">
+        <div id="double-bar-chart" class="chart-scroll">
+          <div class="chart-canvas">
+            <noscript>
+              <p>
+                This chart requires JavaScript to render. In the meantime, see the
+                <a href="#double-bar-table">data table</a> below or
+                <a href="data.csv" download>download the CSV</a>.
+              </p>
+            </noscript>
+          </div>
+        </div>
+
+        <!-- See the Stacked Bar Chart's script.js/index.html for the
+             full rationale -- same mechanism, duplicated per this
+             project's hand-written-per-demo stance. -->
+        <div class="chart-scroll-fade chart-scroll-fade--left" aria-hidden="true">
+          <svg class="chart-scroll-fade__icon" viewBox="0 0 20 20">
+            <path d="M12 5 L7 10 L12 15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </div>
+        <div class="chart-scroll-fade chart-scroll-fade--right" aria-hidden="true">
+          <svg class="chart-scroll-fade__icon" viewBox="0 0 20 20">
+            <path d="M8 5 L13 10 L8 15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </div>
+      </div>
+
+      <div id="double-bar-legend"></div>
+      <div id="double-bar-legend-status" class="visually-hidden" aria-live="polite"></div>
+
+      <details class="chart-longdesc">
+        <summary>Long description <span class="nav-caret" aria-hidden="true">▾</span></summary>
+        <p>
+          Approved claims hold fairly steady all through 2023, between about 41 and 50 a
+          month, with denials low and flat at 8–12. A stricter review process introduced
+          in January 2024 pushes denials sharply higher — 20–26 a month from January
+          through May 2024, roughly double the normal rate, while approvals dip to
+          35–39. The process is relaxed starting June 2024: denials fall back to 15,
+          then to single digits by September 2024, and approvals recover to their normal
+          41–51 range for the rest of the period through June 2025.
+        </p>
+      </details>
+    </div>
+
+    <div class="callout">
+      <p>
+        See the <a href="../../charts/stacked-bar-chart/index.html">Stacked Bar
+        Chart</a> for this project's fuller template walkthrough — this page follows
+        the same pattern (accessible hotspot overlay, interactive legend, sortable data
+        table) and mostly calls out what's <em>different</em> for a diverging chart
+        rather than repeating everything.
+      </p>
+    </div>
+
+    <h2>When to use it</h2>
+    <p>
+      Use a double bar graph when there are exactly two related-but-opposing counts per
+      category, and readers need to see both the size of each side and the balance
+      between them — approved vs. denied, income vs. expenses, this year vs. last year.
+    </p>
+    <p><strong>It's the wrong choice when:</strong></p>
+    <ul class="text-columns">
+      <li>
+        There are more than two series. A diverging axis only reads cleanly with one
+        value on each side — for three or more categories per group, a grouped/clustered
+        bar chart (values side by side, not mirrored) serves better.
+      </li>
+      <li>
+        The two values aren't naturally opposed or comparable on the same scale (e.g.
+        one is a count and the other is a percentage). Mirroring them around a shared
+        zero line implies a relationship that isn't actually there.
+      </li>
+      <li>
+        Readers mainly need the combined total of both sides (e.g. "how many claims were
+        decided this month, period"). Nothing on this chart shows that sum directly —
+        see "Expected accessibility tree" below for how the accessible version handles
+        this instead.
+      </li>
+    </ul>
+
+    <h2>Interaction complexity tier</h2>
+    <p>
+      <strong>Exploratory.</strong> A reader can navigate to and get the exact value of
+      every Approved and Denied bar, not just an overall chart summary. With 30 months ×
+      2 series (60 data points), a single <code>role="img"</code> summary would strand
+      keyboard and screen reader users well below what a sighted user gets by looking at
+      the chart — so this demo implements full point-by-point navigation, the same
+      reasoning as the Stacked Bar Chart.
+    </p>
+
+    <h2>Expected accessibility tree</h2>
+    <p>
+      Same overall pattern as the Stacked Bar Chart: the visual <code>&lt;svg
+      aria-hidden="true"&gt;</code> is purely decorative, and a parallel layer of real,
+      invisibly-styled <code>&lt;button&gt;</code> elements carries all accessibility
+      semantics. The difference is the hotspot model itself — there's no "bar summary"
+      stop here, because Approved and Denied aren't parts of a whole the way stacked
+      segments are. Each one gets its own hotspot text stating both its own value and
+      what share of that month's <em>decided</em> claims (approved + denied) it
+      represents — the closest equivalent to the Stacked Bar Chart's percentage-of-total,
+      computed from the two values that exist rather than a separate combined total
+      hotspot that would otherwise be unreachable by mouse/touch (see that page's
+      "Common failure patterns" for why that specific shortcut doesn't work).
+    </p>
+    <div class="data-table-wrapper">
+      <table>
+        <caption class="visually-hidden">Expected accessibility tree for the double bar graph</caption>
+        <thead>
+          <tr>
+            <th scope="col">Element</th>
+            <th scope="col">Role</th>
+            <th scope="col">Accessible name source</th>
+            <th scope="col">Description source</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Chart container</td>
+            <td><code>group</code></td>
+            <td><code>aria-labelledby</code>: the visible chart title (<code>&lt;h3&gt;</code>), plus a visually-hidden "Double bar graph:" type prefix</td>
+            <td><code>aria-describedby</code>: one-time keyboard instructions (visually hidden — the toolbar's Open keyboard shortcuts button is the visible equivalent, see Live demo)</td>
+          </tr>
+          <tr>
+            <td>Approved stop (one per month)</td>
+            <td><code>button</code> (native)</td>
+            <td>Text content: "January 2023, Approved: 44 claims, 83% of 53 claims decided."</td>
+            <td>None — name is self-contained</td>
+          </tr>
+          <tr>
+            <td>Denied stop (one per month)</td>
+            <td><code>button</code> (native)</td>
+            <td>Text content: "January 2023, Denied: 9 claims, 17% of 53 claims decided."</td>
+            <td>None — name is self-contained</td>
+          </tr>
+          <tr>
+            <td>Tooltip (hover/focus)</td>
+            <td><code>aria-hidden="true"</code> — not in the tree</td>
+            <td>n/a</td>
+            <td>n/a — duplicates the hotspot's own accessible name for sighted users only</td>
+          </tr>
+          <tr>
+            <td>Chart toolbar</td>
+            <td><code>group</code></td>
+            <td><code>aria-label</code>: "Chart options"</td>
+            <td>n/a</td>
+          </tr>
+          <tr>
+            <td>"Toggle patterns" button</td>
+            <td><code>button</code> (native), toggle pattern via <code>aria-pressed</code></td>
+            <td><code>aria-label</code>: "Toggle patterns" — icon-only, no visible text</td>
+            <td>None. A visible tooltip appears on hover/focus with the same text as <code>aria-label</code>, but it's decorative (<code>aria-hidden</code>)</td>
+          </tr>
+          <tr>
+            <td>"Open keyboard shortcuts" disclosure</td>
+            <td><code>group</code> (native <code>&lt;details&gt;</code>/<code>&lt;summary&gt;</code>) — closes on <kbd>Esc</kbd> and when focus leaves it</td>
+            <td><code>aria-label</code> on the <code>&lt;summary&gt;</code>: "Open keyboard shortcuts"</td>
+            <td>n/a — expanded content (a table) is the reference itself</td>
+          </tr>
+          <tr>
+            <td>"Download CSV"</td>
+            <td><code>link</code> (native <code>&lt;a download&gt;</code>)</td>
+            <td><code>aria-label</code>: "Download CSV"</td>
+            <td>None</td>
+          </tr>
+          <tr>
+            <td>Long description</td>
+            <td><code>group</code> (native <code>&lt;details&gt;</code>/<code>&lt;summary&gt;</code>)</td>
+            <td>Summary text: "Long description"</td>
+            <td>n/a — expanded content is the description itself</td>
+          </tr>
+          <tr>
+            <td>Legend entry (Approved / Denied)</td>
+            <td><code>button</code> (native), toggle series visibility via <code>aria-pressed</code></td>
+            <td>Text content: the series name</td>
+            <td>None — state is on the element itself via <code>aria-pressed</code>. Since there are only two series, hiding either one locks the other's button with <code>aria-disabled="true"</code>, same rule as the Stacked Bar Chart's legend, just reached after one toggle instead of four</td>
+          </tr>
+          <tr>
+            <td>Legend status region</td>
+            <td><code>aria-live="polite"</code>, visually hidden</td>
+            <td>n/a</td>
+            <td>Announces what just changed on every toggle ("Approved hidden." / "Approved shown.")</td>
+          </tr>
+          <tr>
+            <td>Data table fallback</td>
+            <td><code>table</code>, sortable column headers as <code>button</code> inside <code>th</code></td>
+            <td>Column <code>&lt;th&gt;</code> text; row <code>&lt;th scope="row"&gt;</code> = month</td>
+            <td><code>aria-sort</code> on each sortable <code>&lt;th&gt;</code></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>Keyboard pattern</h2>
+    <p>
+      The whole chart is a single Tab stop, same roving-tabindex approach as the Stacked
+      Bar Chart. The model is flatter here, though: there's no bar-summary-to-segment
+      hierarchy to move through, just two fixed stops per month, so Up and Down jump
+      directly to Approved or Denied rather than climbing a stack — and there's no
+      <kbd>Escape</kbd> row, because there's no nested level to back out of.
+    </p>
+    <div class="data-table-wrapper">
+      <table>
+        <caption class="visually-hidden">Keyboard pattern for the double bar graph</caption>
+        <thead>
+          <tr>
+            <th scope="col">Key</th>
+            <th scope="col">Expected behavior</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row">Tab</th><td>Moves focus into the chart, landing on whichever stop was last focused (Approved, January 2023, initially). Moves focus out entirely on the way back — this is one Tab stop, not many.</td></tr>
+          <tr><th scope="row">Shift+Tab</th><td>Moves focus out of the chart, backward.</td></tr>
+          <tr><th scope="row">Right Arrow</th><td>Moves to the next month, staying on the same series (Approved stays Approved; Denied stays Denied).</td></tr>
+          <tr><th scope="row">Left Arrow</th><td>Moves to the previous month, same series.</td></tr>
+          <tr><th scope="row">Up Arrow</th><td>Jumps to Approved, same month. No-ops if Approved is currently hidden via the legend — there's no stop there to move to.</td></tr>
+          <tr><th scope="row">Down Arrow</th><td>Jumps to Denied, same month. Same no-op rule if Denied is hidden.</td></tr>
+          <tr><th scope="row">Home</th><td>Jumps to the first month (January 2023), same series.</td></tr>
+          <tr><th scope="row">End</th><td>Jumps to the last month (June 2025), same series.</td></tr>
+          <tr><th scope="row">Tab / Enter or Space</th><td>Each legend entry is its own standalone Tab stop (not part of the chart's roving group) — Enter or Space toggles it.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>Legend as a filter</h2>
+    <p>
+      Same idiom as the Stacked Bar Chart's legend (see that page's "Legend as a
+      filter" for the fuller rationale), simplified: hiding a series here doesn't require
+      recomputing anything about the other one, since Approved and Denied are
+      independent counts, not parts of a stack that has to close a gap. Hiding Approved
+      just removes its bars and hotspots entirely; Denied is completely unaffected.
+      With only two series, hiding either one immediately locks the other (its button
+      gets <code>aria-disabled</code>) — there's no scenario here where more than one
+      toggle is needed to reach that state. The data table fallback is, as with the
+      Stacked Bar Chart, deliberately <strong>not</strong> affected by this filter.
+    </p>
+
+    <h2>Screen reader behavior</h2>
+    <p>
+      Because every navigable stop is a real, focusable <code>&lt;button&gt;</code>,
+      moving focus is enough to trigger a standard AT announcement — role, name, and
+      nothing else, the same reasoning as the Stacked Bar Chart. The one-time
+      instructions are attached via <code>aria-describedby</code> and are also visible
+      on screen (see the hint above the chart), not just exposed to AT.
+    </p>
+    <p>
+      As with the Stacked Bar Chart, toggling a legend entry doesn't move focus
+      anywhere, so the visually-hidden <code>aria-live="polite"</code> region is what
+      carries the news that a series was hidden or shown.
+    </p>
+
+    <h3>Verified SR × browser matrix</h3>
+    <p>
+      This page is new — none of the following has been verified against real
+      assistive technology yet. Marked honestly rather than omitted, per the site's own
+      standard (see <a href="../../verified-against/index.html">Verified Against</a>).
+    </p>
+    <div class="data-table-wrapper">
+      <table>
+        <caption class="visually-hidden">Verified screen reader and browser combinations for the double bar graph</caption>
+        <thead>
+          <tr>
+            <th scope="col">Screen reader</th>
+            <th scope="col">Browser</th>
+            <th scope="col">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row">JAWS</th><td>Edge</td><td>Not yet verified</td></tr>
+          <tr><th scope="row">NVDA</th><td>Edge</td><td>Not yet verified</td></tr>
+          <tr><th scope="row">NVDA</th><td>Firefox</td><td>Not tested in our environment (Firefox unavailable) — not yet verified elsewhere either</td></tr>
+          <tr><th scope="row">VoiceOver</th><td>macOS Safari</td><td>Not yet verified</td></tr>
+          <tr><th scope="row">VoiceOver</th><td>iOS Safari</td><td>Not yet verified</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>Data table fallback</h2>
+    <p>
+      Same dataset, sortable by any column. This is a genuine parallel option for
+      readers who want exact values — not a replacement for the chart above. (CSV
+      download is in the chart's own toolbar, in the Live demo section above.)
+    </p>
+    <div id="double-bar-table-wrapper" class="data-table-wrapper">
+      <table id="double-bar-table">
+        <caption>Monthly insurance claims, approved vs. denied, January 2023–June 2025</caption>
+        <thead>
+          <tr>
+            <th scope="col" data-sort-key="month" aria-sort="ascending"><button type="button">Month</button></th>
+            <th scope="col" data-sort-key="approved" aria-sort="none"><button type="button">Approved</button></th>
+            <th scope="col" data-sort-key="denied" aria-sort="none"><button type="button">Denied</button></th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <h2>Common failure patterns seen in audits</h2>
+    <p>
+      Seeded with well-known, representative failures to start this page — not yet a
+      team-sourced catalog from real audits. Replace/extend as the team encounters real
+      examples (see CLAUDE.md's sourcing note).
+    </p>
+    <ul class="text-columns">
+      <li>
+        <strong>Raw signed values read out or labeled on a diverging axis</strong> — a
+        chart that shows "-9" for 9 denied claims, whether visually on the axis or
+        announced to a screen reader, forces the reader to do the sign-flip themselves.
+        This demo's axis labels show absolute values (see script.js's <code>Y_TICKS</code>
+        comment), and every hotspot's text is plain language ("Denied: 9 claims") with no
+        sign at all. (WCAG 1.3.1 Info and Relationships — the visual convention and the
+        programmatically exposed value need to agree on what a reader actually needs)
+      </li>
+      <li>
+        <strong>Segments distinguished by color alone</strong>, with no pattern/texture
+        and no text alternative — same failure as the Stacked Bar Chart, same fix (a
+        toggleable, forced-colors-mandatory pattern fill).
+      </li>
+      <li>
+        <strong>No visual distinction for the zero/reference line</strong> — if every
+        gridline looks the same, a reader has to count ticks to figure out where
+        "positive" turns into "negative." This demo gives the zero line the same bolder
+        treatment the Stacked Bar Chart gives its (edge) baseline. (WCAG 1.4.11 Non-text
+        Contrast)
+      </li>
+      <li>
+        <strong>No keyboard path to individual values</strong> — same failure, same fix
+        as the Stacked Bar Chart: a full hotspot overlay, not just a mouse-hover tooltip.
+        (WCAG 2.1.1 Keyboard, 1.1.1 Non-text Content)
+      </li>
+      <li>
+        <strong>A data table fallback exists but isn't a real equivalent</strong> —
+        missing column/row headers, not actually reachable via keyboard, or omitting
+        values the chart shows. (WCAG 1.3.1 Info and Relationships)
+      </li>
+      <li>
+        <strong>Dense charts shrink to illegible size on small screens</strong> instead
+        of reflowing — same fix as the Stacked Bar Chart: a legible-size floor and
+        horizontal scroll below it, not indefinite shrinking. (WCAG 1.4.10 Reflow)
+      </li>
+    </ul>
+
+    <h2>Mobile / touch equivalent</h2>
+    <p>
+      Same behavior as the Stacked Bar Chart: below roughly 900px the chart stops
+      shrinking and scrolls horizontally instead, with a gradient-plus-chevron
+      sighted-only signal for "there's more this way." The hotspot buttons work as
+      normal tap targets for sighted touch users and are real focusable elements for
+      switch-access and other assistive input methods. The same two honest caveats
+      apply: VoiceOver (iOS) and TalkBack swipe navigation walk the accessibility tree
+      in document order regardless of <code>tabindex</code> (60 stops here, not 180 —
+      still a real cost, just a smaller one than the Stacked Bar Chart's), and there's
+      no distinct visual "focused/selected" state beyond the default focus ring, which
+      isn't generally shown for touch taps at all.
+    </p>
+
+    <h2>Library notes</h2>
+    <p>
+      Plain links for v1 — no accessibility verdict yet (see
+      <a href="https://github.com/formspiel/plainsight/issues/1">tracking issue</a>).
+    </p>
+    <ul>
+      <li><a href="https://www.highcharts.com/">Highcharts</a></li>
+      <li><a href="https://www.chartjs.org/">Chart.js</a></li>
+      <li><a href="https://d3js.org/">D3</a></li>
+      <li><a href="https://echarts.apache.org/">ECharts</a></li>
+      <li><a href="https://recharts.org/">Recharts</a></li>
+      <li><a href="https://nivo.rocks/">Nivo</a></li>
+    </ul>
   </main>
 
   <footer class="site-footer">
     <p>Plainsight — a chart accessibility pattern reference. <a href="https://github.com/formspiel/plainsight">Source on GitHub</a>.</p>
   </footer>
+
+  <script type="module" src="script.js"></script>
   <script type="module" src="../../js/site-nav.js"></script>
 </body>
 </html>

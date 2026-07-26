@@ -61,6 +61,18 @@
     animation: chart-bar-grow 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
   }
 
+  /* For a diverging chart (see Double Bar Graph) a bar growing "from
+     the bottom" is only correct above the zero line -- a bar extending
+     below it needs to grow from its own top edge (which sits at zero)
+     instead, or it visually grows the wrong way. Each such bar gets its
+     own single-segment group with this modifier, rather than sharing
+     one group with the bar above zero the way stacked segments do,
+     since the two halves don't share a bounding-box edge to anchor a
+     single transform-origin against. */
+  .chart-bar-group--down {
+    transform-origin: top;
+  }
+
   @keyframes chart-bar-grow {
     from {
       transform: scaleY(0);
@@ -175,7 +187,7 @@
     forced-color-adjust: none;
   }
 
-  #stacked-bar-pattern-toggle {
+  .pattern-toggle {
     display: none !important;
   }
 }
