@@ -195,7 +195,13 @@ pre {
   position: relative;
 }
 
+/* display: inline, not the <summary> default of list-item -- with the
+   default, a summary renders at line-height (23.56px here) while an
+   inline <a> renders tight to its own glyph box (18px), so despite an
+   *identical* font-size the two looked visibly different sizes next to
+   each other in the nav row. */
 .site-nav summary {
+  display: inline;
   cursor: pointer;
   font-weight: 600;
   font-size: 0.95rem;

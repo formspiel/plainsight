@@ -6,7 +6,11 @@
    that's all on .chart-canvas below. */
 .chart-figure {
   position: relative;
-  margin: 1.5rem 0;
+  /* Less bottom margin than top: the SVG's own rotated month labels
+     (MARGIN.bottom in script.js) already reserve real space below the
+     bars, so a full 1.5rem on top of that read as a bigger gap to the
+     legend than intended (see .chart-legend's own margin/padding). */
+  margin: 1.5rem 0 0.5rem;
 }
 
 /* The actual horizontally-scrolling region. At 30 months x 5 series, the
@@ -379,7 +383,21 @@ button.toolbar-btn[aria-pressed="true"] {
   flex-wrap: wrap;
   gap: 0.5rem 1.5rem;
   padding: 0;
-  margin: 1rem 0 1.5rem;
+  /* Left-aligned with the plot area (where gridlines/bars start), not
+     the container edge -- MARGIN.left / VIEWBOX_WIDTH from script.js is
+     56/1000 = 5.6%. Uses the exact same max(100%, 900px) expression as
+     .chart-canvas's own width (both resolve the 100% against the same
+     containing block, .page), so this stays aligned with the bars
+     whether the chart is at its natural width or pinned to its 900px
+     scroll floor -- a plain percentage alone would only match at the
+     one width where the legend and the canvas happen to be equally
+     wide. */
+  padding-left: calc(max(100%, 900px) * 0.056);
+  /* Tighter than before: the chart's own rotated month labels already
+     reserve real vertical space at the bottom (MARGIN.bottom in
+     script.js), so stacking a full 1rem of margin on top of that read
+     as a bigger chart-to-legend gap than intended. */
+  margin: 0.5rem 0 1.5rem;
   font-size: 0.9rem;
 }
 
