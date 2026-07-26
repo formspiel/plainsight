@@ -40,15 +40,20 @@ a:visited {
 }
 
 /* A <summary> is interactive the same way a link is, so it gets the
-   same --link color globally -- but never an underline, even on
-   hover/focus. The underline's presence (link) vs. absence (summary) is
-   the one remaining differentiator between "this navigates" and "this
-   opens/closes something," now that both share a color. Elements that
+   same --link color AND underline as a link, globally -- an earlier
+   version left summary un-underlined so the underline could double as
+   a second "this opens/closes something" vs. "this navigates" signal.
+   In practice, a row of nav items where some are underlined and some
+   aren't reads as inconsistent rather than deliberate ("es wirkt
+   unruhig"). The caret (see .nav-caret) is signifier enough on its own
+   wherever one is needed -- every summary now looks exactly like a
+   link because, interaction-wise, it basically is one. Elements that
    need a neutral (non-link) color regardless of tag -- e.g. the chart
    toolbar's icon-only buttons, see .toolbar-btn in chart.css -- override
    this with their own higher-specificity class rule. */
 summary {
   color: var(--link);
+  text-decoration: underline;
 }
 
 p {
@@ -199,7 +204,8 @@ pre {
    default, a summary renders at line-height (23.56px here) while an
    inline <a> renders tight to its own glyph box (18px), so despite an
    *identical* font-size the two looked visibly different sizes next to
-   each other in the nav row. */
+   each other in the nav row. Color and underline come from the global
+   summary rule above (matching .site-nav a). */
 .site-nav summary {
   display: inline;
   cursor: pointer;
