@@ -1,9 +1,11 @@
 # Project Brief: Plainsight — Chart Accessibility Pattern Reference
 
 ## Status
-Pre-build. This document is the output of an ideation/planning conversation and is meant
-to hand off full context to whoever (human or Claude Code) builds v1. Nothing has been
-built yet.
+In progress. This document is the output of an ideation/planning conversation and is
+meant to hand off full context to whoever (human or Claude Code) builds v1. Built so
+far: Stacked Bar Chart and Double Bar Graph (both v1 chart pages, full pattern
+implementation). Remaining v1 chart types (Donut/Pie, Multi-Series Line, Likert Scale)
+and all cross-cutting pattern pages are still stubs.
 
 ## Mission
 A library-agnostic reference site documenting expected keyboard operation and screen
@@ -184,17 +186,22 @@ Clearcut, Keynote (ruled out — conflicts with an existing product name).
    candidate library list (Highcharts, Chart.js, D3, ECharts, Recharts, Nivo) and
    definition of done (verdict-style entries replacing/joining plain links).
 2. **Motion / reduced-motion decision** — entrance animation (bars growing up from
-   the baseline, staggered left-to-right) now implemented on the Stacked Bar Chart as
-   the real demo to decide this against, per the plan below: allowed normally,
-   suppressed entirely under `prefers-reduced-motion` (confirmed straightforward in
-   practice — one `@media (prefers-reduced-motion: no-preference)` block wrapping the
-   `@keyframes` rule). The animation is purely visual (the hotspot overlay is
-   positioned independently and is immediately interactive/correct regardless of
-   whether the animation is playing). Still deferred, now that there's a real demo to
-   decide it against: whether value *changes* (not just entrance — e.g. toggling
-   "Show patterns", a future live-data update) need a non-animated visual indicator
-   under reduced motion so sighted reduced-motion users don't miss a change entirely.
-   Not yet addressed on the Stacked Bar Chart's own pattern toggle.
+   the baseline, staggered left-to-right) now implemented on both the Stacked Bar
+   Chart and Double Bar Graph as the real demos to decide this against, per the plan
+   below: allowed normally, suppressed entirely under `prefers-reduced-motion`
+   (confirmed straightforward in practice — one
+   `@media (prefers-reduced-motion: no-preference)` block wrapping the `@keyframes`
+   rule). The animation is purely visual (the hotspot overlay is positioned
+   independently and is immediately interactive/correct regardless of whether the
+   animation is playing). Two toggles now exist on each chart with different
+   answers to the "value changed" question: the **pattern toggle** (fill patterns
+   on/off) is a pure CSS class swap with no animation either way, so reduced-motion
+   users see the same instant change as everyone else — nothing to suppress, nothing
+   missing. The **legend toggle** (hide/show a series) rebuilds the bars via the same
+   animated-entrance path, which IS suppressed under reduced motion with no
+   substitute cue yet — still deferred: whether that rebuild needs a distinct
+   non-animated "this changed" indicator under reduced motion so sighted
+   reduced-motion users don't miss a series appearing/disappearing.
 3. **Changelog generation from git history** — deferred until there's meaningful
    (post-beta-churn) history to generate from. Confirmed feasible: Conventional Commits
    + a generator like `git-cliff` or `release-please` can filter to `feat`/`fix` only,

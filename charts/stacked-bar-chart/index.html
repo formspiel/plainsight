@@ -83,7 +83,7 @@
 
     <div id="stacked-bar-demo" class="chart-demo">
       <div class="chart-header">
-        <h3 id="stacked-bar-title" tabindex="-1">
+        <h3 id="stacked-bar-title" class="chart-title" tabindex="-1">
           <span id="stacked-bar-chart-type" class="visually-hidden">Stacked bar chart: </span>
           Monthly Insurance Claims by Category, January 2023–June 2025
         </h3>
@@ -393,7 +393,9 @@
       — it stays a complete, independent view of every category's exact values
       regardless of what's currently toggled in the chart, per this project's own
       thesis that the table is a genuine parallel option, not something that should
-      depend on the chart's display state.
+      depend on the chart's display state. This is one implementation of the general
+      <a href="../../patterns/legends-as-filters/index.html">Legends as Filters</a>
+      cross-cutting pattern.
     </p>
 
     <h2>Screen reader behavior</h2>

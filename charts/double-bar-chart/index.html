@@ -85,7 +85,7 @@
 
     <div id="double-bar-demo" class="chart-demo">
       <div class="chart-header">
-        <h3 id="double-bar-title" tabindex="-1">
+        <h3 id="double-bar-title" class="chart-title" tabindex="-1">
           <span id="double-bar-chart-type" class="visually-hidden">Double bar graph: </span>
           Monthly Insurance Claims, Approved vs. Denied, January 2023–June 2025
         </h3>
@@ -381,6 +381,9 @@
       gets <code>aria-disabled</code>) — there's no scenario here where more than one
       toggle is needed to reach that state. The data table fallback is, as with the
       Stacked Bar Chart, deliberately <strong>not</strong> affected by this filter.
+      This is one implementation of the general
+      <a href="../../patterns/legends-as-filters/index.html">Legends as Filters</a>
+      cross-cutting pattern.
     </p>
 
     <h2>Screen reader behavior</h2>
