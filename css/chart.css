@@ -326,6 +326,28 @@ button.toolbar-btn[aria-pressed="true"] {
   display: none;
 }
 
+/* Tooltips are a hover/focus-driven, sighted-only convenience -- see
+   the comment above .chart-tooltip. On a touch device there's no real
+   hover state, and a tap collapses focus and click into one ambiguous
+   gesture, which showed up as three different broken behaviors on the
+   toolbar's three buttons: stuck open (a plain toggle button, nothing
+   ever fires a "leave" event to hide it), a visible flash (the
+   keyboard-shortcuts button explicitly hides the tooltip the instant
+   its panel opens, and on tap both happen at once), and never
+   appearing at all (the CSV download interrupts the page before the
+   focus-triggered show() has anything to render). Rather than patch
+   each of those three differently, this suppresses the tooltip
+   outright wherever there's no fine pointer with genuine hover
+   capability -- one honest "doesn't try" beats three different
+   half-working attempts. AT users on touch (VoiceOver/TalkBack) are
+   unaffected either way: they already get the accessible name directly
+   on tap, no tooltip involved. */
+@media (hover: none), (pointer: coarse) {
+  .chart-tooltip {
+    display: none !important;
+  }
+}
+
 /* Chart title + toolbar, in one header row: title left, options top-right,
    directly above the chart -- visually ties the chart and its legend
    together as one unit, with the options addressing "this chart" rather

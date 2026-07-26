@@ -486,6 +486,13 @@
         of reflowing — same fix as the Stacked Bar Chart: a legible-size floor and
         horizontal scroll below it, not indefinite shrinking. (WCAG 1.4.10 Reflow)
       </li>
+      <li>
+        <strong>Hover/focus tooltips left running on touch, unmodified</strong> — same
+        failure as the Stacked Bar Chart's toolbar (see that page's "Common failure
+        patterns" for the three distinct broken behaviors this actually produced), same
+        fix: suppressed outright under <code>(hover: none), (pointer: coarse)</code>
+        rather than patched per symptom.
+      </li>
     </ul>
 
     <h2>Mobile / touch equivalent</h2>
@@ -494,12 +501,17 @@
       shrinking and scrolls horizontally instead, with a gradient-plus-chevron
       sighted-only signal for "there's more this way." The hotspot buttons work as
       normal tap targets for sighted touch users and are real focusable elements for
-      switch-access and other assistive input methods. The same two honest caveats
-      apply: VoiceOver (iOS) and TalkBack swipe navigation walk the accessibility tree
-      in document order regardless of <code>tabindex</code> (60 stops here, not 180 —
-      still a real cost, just a smaller one than the Stacked Bar Chart's), and there's
-      no distinct visual "focused/selected" state beyond the default focus ring, which
-      isn't generally shown for touch taps at all.
+      switch-access and other assistive input methods. The same caveats apply:
+      VoiceOver (iOS) and TalkBack swipe navigation walk the accessibility tree in
+      document order regardless of <code>tabindex</code> (60 stops here, not 180 —
+      still a real cost, just a smaller one than the Stacked Bar Chart's); there's no
+      distinct visual "focused/selected" state beyond the default focus ring, which
+      isn't generally shown for touch taps at all; and the hover/focus tooltip is
+      suppressed outright on touch (<code>(hover: none), (pointer: coarse)</code> in
+      <code>chart.css</code>) rather than left to run, since one tap collapses "hover"
+      and "click" into a single gesture and produced three different broken behaviors
+      on this toolbar's own three buttons before it was suppressed — see the Stacked
+      Bar Chart's "Mobile / touch equivalent" for exactly what each one looked like.
     </p>
 
     <h2>Library notes</h2>

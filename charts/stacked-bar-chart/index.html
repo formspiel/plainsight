@@ -555,6 +555,25 @@
         own total updates to match what's actually shown. (WCAG 4.1.2 Name, Role,
         Value — the state a sighted user sees and the state AT exposes must match)
       </li>
+      <li>
+        <strong>Hover/focus tooltips left running on touch, unmodified</strong> —
+        found on this very demo's own toolbar: tapping a plain toggle button left its
+        tooltip stuck visible (no "leave" event ever fires on touch to hide it);
+        tapping a button that opens a panel produced a visible flash (the tooltip
+        shows on focus, then the panel-open code immediately hides it, both in one
+        tap); tapping a button that navigates away (a CSV download) showed no tooltip
+        at all (the page moves on before the focus-triggered tooltip renders). Three
+        different symptoms from the same root cause: hover and focus are two separate
+        signals on desktop, but tap collapses them into one ambiguous gesture with no
+        reliable way to detect "the user has moved on." Fixed here by suppressing the
+        tooltip outright under <code>(hover: none), (pointer: coarse)</code> (see
+        "Mobile / touch equivalent" below) rather than patching each symptom
+        separately — worth checking for specifically any time a tooltip mechanism
+        built and tested with a mouse gets shipped without a pass on an actual touch
+        device. (WCAG 2.5.1 Pointer Gestures is not violated here — there's no gesture
+        being required — but this is exactly the kind of desktop-only testing gap that
+        produces real touch failures with no single WCAG criterion to catch them)
+      </li>
     </ul>
 
     <h2>Mobile / touch equivalent</h2>
@@ -586,9 +605,27 @@
       <li>
         <strong>No distinct visual "focused/selected" state</strong> beyond the
         browser's default focus ring, which is not generally shown for touch taps at
-        all. The tooltip is hover/focus-triggered and doesn't have a touch equivalent
-        either — a sighted touch user gets little visual feedback that a bar was
-        "selected" for exploration purposes.
+        all. The hover/focus tooltip is deliberately suppressed on touch entirely (see
+        next) rather than attempting a broken touch equivalent, so a sighted touch user
+        gets no extra visual confirmation that a bar was "selected" for exploration —
+        the chart's own visible state (the focused segment's fill/pattern) is what's
+        left to notice.
+      </li>
+      <li>
+        <strong>The hover/focus tooltip is suppressed outright below <code>(hover:
+        hover) and (pointer: fine)</code></strong>, rather than left to run. On a touch
+        device, one tap collapses "hover" and "click" into a single ambiguous gesture,
+        which produced three different broken behaviors depending on what the tapped
+        toolbar button actually does: tapping "Toggle patterns" left the tooltip stuck
+        visible (nothing ever fires a "leave" event on touch to hide it); tapping "Open
+        keyboard shortcuts" produced a visible flash (the tooltip shows on focus, then
+        this demo's own code immediately hides it the instant the panel opens — both
+        happen in the same tap); and tapping "Download CSV" showed no tooltip at all
+        (the download interrupts the page before the focus-triggered tooltip has
+        anything to render). Rather than patch each of those three differently, the
+        tooltip doesn't try to run on touch at all — an honest "doesn't attempt this"
+        beats three different half-working attempts, and it costs nothing for AT users
+        on touch, who already get the accessible name directly on tap regardless.
       </li>
     </ul>
 
