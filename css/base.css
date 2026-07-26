@@ -152,6 +152,16 @@ pre {
   padding: 0;
 }
 
+/* Same color as plain body text, not the usual --link color -- the only
+   signifier for "this one opens a dropdown, this one navigates directly"
+   is the caret (see .nav-caret below). Mixing link-purple and plain-text
+   items in one row read as two unrelated colors doing the same job the
+   caret already does on its own. */
+.site-nav a,
+.site-nav a:visited {
+  color: var(--text);
+}
+
 .site-nav a {
   text-decoration: none;
   font-weight: 600;
@@ -180,12 +190,35 @@ pre {
   list-style: none;
 }
 
+.site-nav summary:hover,
+.site-nav summary:focus-visible {
+  text-decoration: underline;
+}
+
 .site-nav summary::-webkit-details-marker {
   display: none;
 }
 
-.site-nav summary::after {
-  content: " \25BE";
+/* A real element, not a ::after glyph, specifically so it can carry its
+   own size and color independent of the summary's own text -- it's the
+   sole signifier that this nav item opens a dropdown (see the color
+   note on .site-nav a above), so it needs to actually read as bigger,
+   not just be present. Colored with the dark-mode-specific forest tint
+   (not --accent) because --accent is deliberately held constant for
+   button fills (see tokens.css) and only clears ~3.2:1 against the dark
+   surface -- fine for a button, tight for this. */
+.nav-caret {
+  display: inline-block;
+  margin-left: 0.2em;
+  font-size: 1.3em;
+  line-height: 1;
+  color: var(--accent);
+}
+
+@media (prefers-color-scheme: dark) {
+  .nav-caret {
+    color: var(--color-forest-tint);
+  }
 }
 
 .site-nav details ul {
@@ -225,6 +258,27 @@ pre {
 
 .breadcrumb a {
   color: var(--text-muted);
+}
+
+/* ---------- Multi-column reflow for uneven-length list items ----------
+   For lists where items vary a lot in length (e.g. "Common failure
+   patterns" on a chart page: one three-line item next to a one-line
+   item) -- rather than force every item to a fixed short length or
+   accept the wasted whitespace of a full-width single column. Reflows
+   into two-plus columns automatically once there's enough width, one
+   column below that -- no media query needed, the browser's column-width
+   algorithm already does the "if there's enough space" part. break-inside
+   keeps a single item from splitting across a column boundary. Reading
+   order for AT users follows DOM order regardless of the visual column
+   layout, so this is presentation-only. */
+.text-columns {
+  column-width: 22rem;
+  column-gap: 2rem;
+}
+
+.text-columns > li,
+.text-columns > p {
+  break-inside: avoid;
 }
 
 /* ---------- Callouts / cards ---------- */

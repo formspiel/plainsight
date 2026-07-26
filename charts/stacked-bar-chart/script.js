@@ -18,6 +18,7 @@
 */
 
 import { linearScale, rectPath } from "../../js/svg-helpers.js";
+import { makeDetailsDismissible } from "../../js/details-dismiss.js";
 import { stackedBarData, seriesNames, formatMonth } from "./data.js";
 
 const SVG_NS = "http://www.w3.org/2000/svg";
@@ -437,7 +438,14 @@ function buildTooltip(container) {
 function wireTooltip(layer, tooltip, selector = ".hotspot") {
   function handleEnter(event) {
     const target = event.target.closest(selector);
-    if (target) tooltip.show(target);
+    if (!target) return;
+    // A <summary> whose <details> is already open is showing its full
+    // panel right below/over it -- re-showing the small hover/focus
+    // tooltip on top of that panel (e.g. refocusing it after Shift+Tab
+    // back in) would just cover the panel's own content a second time.
+    const ownerDetails = target.closest("details");
+    if (ownerDetails && ownerDetails.open && target.tagName === "SUMMARY") return;
+    tooltip.show(target);
   }
 
   function handleLeave(event) {
@@ -483,7 +491,7 @@ function wirePatternToggle(toggleButton, demoRoot) {
 // browser actually positions "left" against.
 // ---------------------------------------------------------------------
 
-function wireKeyboardPanel(details, demoRoot) {
+function wireKeyboardPanel(details, demoRoot, toolbarTooltip) {
   if (!details) return;
   const summary = details.querySelector("summary");
   const panel = details.querySelector(".keyboard-panel");
@@ -493,6 +501,12 @@ function wireKeyboardPanel(details, demoRoot) {
 
   details.addEventListener("toggle", () => {
     if (!details.open) return;
+    // The summary's own hover/focus tooltip ("Open keyboard shortcuts")
+    // has nothing to add once the full panel is open right next to/over
+    // it -- and opening via keyboard (Enter/Space on an already-focused,
+    // already-tooltipped summary) doesn't fire a new focus event to hide
+    // it on its own, so hide it explicitly here.
+    toolbarTooltip?.hide();
     const offsetParent = panel.offsetParent;
     if (!offsetParent) return;
     const parentRect = offsetParent.getBoundingClientRect();
@@ -636,14 +650,17 @@ document.addEventListener("DOMContentLoaded", () => {
   if (demoRoot) wirePatternToggle(patternToggle, demoRoot);
 
   const toolbar = document.querySelector(".chart-toolbar");
+  let toolbarTooltip = null;
   if (toolbar) {
-    const toolbarTooltip = buildTooltip(toolbar);
+    toolbarTooltip = buildTooltip(toolbar);
     wireTooltip(toolbar, toolbarTooltip, ".toolbar-btn");
   }
 
+  const keyboardDetails = document.querySelector(".keyboard-details");
   if (demoRoot) {
-    wireKeyboardPanel(document.querySelector(".keyboard-details"), demoRoot);
+    wireKeyboardPanel(keyboardDetails, demoRoot, toolbarTooltip);
   }
+  makeDetailsDismissible(keyboardDetails);
 
   const legendContainer = document.getElementById("stacked-bar-legend");
   if (legendContainer) renderLegend(legendContainer);

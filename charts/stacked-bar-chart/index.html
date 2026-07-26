@@ -23,7 +23,7 @@
           <li><a href="../../getting-started/index.html">Getting Started</a></li>
           <li>
             <details>
-              <summary>Chart Types</summary>
+              <summary>Chart Types <span class="nav-caret" aria-hidden="true">▾</span></summary>
               <ul>
                 <li><a href="../../charts/stacked-bar-chart/index.html" aria-current="page">Stacked Bar Chart</a></li>
                 <li><a href="../../charts/double-bar-chart/index.html">Double Bar Graph</a></li>
@@ -35,7 +35,7 @@
           </li>
           <li>
             <details>
-              <summary>Cross-Cutting Patterns</summary>
+              <summary>Cross-Cutting Patterns <span class="nav-caret" aria-hidden="true">▾</span></summary>
               <ul>
                 <li><a href="../../patterns/color-encoding/index.html">Color &amp; Non-Color Encoding</a></li>
                 <li><a href="../../patterns/tooltips/index.html">Tooltips</a></li>
@@ -72,6 +72,8 @@
       then use the arrow keys described below.
     </p>
 
+    <a class="skip-link" href="#after-stacked-bar-demo">Skip chart demo</a>
+
     <div id="stacked-bar-demo" class="chart-demo">
       <div class="chart-header">
         <h3 id="stacked-bar-title">
@@ -85,8 +87,8 @@
             id="stacked-bar-pattern-toggle"
             class="toolbar-btn"
             aria-pressed="false"
-            aria-label="Patterns"
-            data-tooltip="Patterns"
+            aria-label="Toggle patterns"
+            data-tooltip="Toggle patterns"
           >
             <svg class="toolbar-btn__icon" viewBox="0 0 20 20" aria-hidden="true">
               <rect x="3" y="3" width="14" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="1.5" />
@@ -95,7 +97,7 @@
           </button>
 
           <details class="keyboard-details">
-            <summary class="toolbar-btn" aria-label="Keyboard shortcuts" data-tooltip="Keyboard shortcuts">
+            <summary class="toolbar-btn" aria-label="Open keyboard shortcuts" data-tooltip="Open keyboard shortcuts">
               <svg class="toolbar-btn__icon" viewBox="0 0 20 20" aria-hidden="true">
                 <rect x="2" y="5" width="16" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="1.5" />
                 <rect x="4.5" y="7.5" width="1.6" height="1.6" fill="currentColor" />
@@ -132,7 +134,7 @@
         Interactive chart with 30 months of data. Use Left and Right arrow keys to move
         between months, Down arrow to explore categories within a month, Up arrow to
         move back toward the month summary, Home and End to jump to the first or last
-        month. See the Keyboard shortcuts button above for the full reference.
+        month. See the Open keyboard shortcuts button above for the full reference.
       </span>
 
       <div id="stacked-bar-chart" class="chart-figure">
@@ -165,7 +167,7 @@
       </details>
     </div>
 
-    <div class="callout">
+    <div id="after-stacked-bar-demo" class="callout" tabindex="-1">
       <p>
         This page is the template the rest of Plainsight's chart pages follow. If
         you're new here, start with <a href="../../getting-started/index.html">Getting
@@ -182,7 +184,7 @@
       month, and which claim categories drove that total.
     </p>
     <p><strong>It's the wrong choice when:</strong></p>
-    <ul>
+    <ul class="text-columns">
       <li>
         Readers mainly need to compare one segment's value <em>across</em> categories
         (e.g. "was Weather Damage higher in March or September?"). Stacked segments
@@ -238,7 +240,7 @@
             <td>Chart container</td>
             <td><code>group</code></td>
             <td><code>aria-labelledby</code>: the visible chart title (<code>&lt;h3&gt;</code>), plus a visually-hidden "Stacked bar chart:" type prefix — not a separate hardcoded string, so the accessible name can't drift from what's on screen</td>
-            <td><code>aria-describedby</code>: one-time keyboard instructions (visually hidden — the toolbar's Keyboard shortcuts button is the visible equivalent, see Live demo)</td>
+            <td><code>aria-describedby</code>: one-time keyboard instructions (visually hidden — the toolbar's Open keyboard shortcuts button is the visible equivalent, see Live demo)</td>
           </tr>
           <tr>
             <td>Bar summary stop (one per month)</td>
@@ -265,15 +267,15 @@
             <td>n/a</td>
           </tr>
           <tr>
-            <td>"Patterns" toggle</td>
+            <td>"Toggle patterns" button</td>
             <td><code>button</code> (native), toggle pattern via <code>aria-pressed</code></td>
-            <td><code>aria-label</code>: "Patterns" — icon-only, no visible text, so the accessible name can't come from content (icon is <code>aria-hidden</code>)</td>
+            <td><code>aria-label</code>: "Toggle patterns" — icon-only, no visible text, so the accessible name can't come from content (icon is <code>aria-hidden</code>); active wording (a verb, not just the feature's name) since it's also the sighted hover/focus tooltip's only content</td>
             <td>None. A visible tooltip appears on hover/focus with the same text as <code>aria-label</code>, but it's decorative (<code>aria-hidden</code>) — sighted-only, not a second AT-facing description</td>
           </tr>
           <tr>
-            <td>"Keyboard shortcuts" disclosure</td>
-            <td><code>group</code> (native <code>&lt;details&gt;</code>/<code>&lt;summary&gt;</code>), same pattern as Long description below</td>
-            <td><code>aria-label</code> on the <code>&lt;summary&gt;</code>: "Keyboard shortcuts" (icon-only, same reasoning as the toggle above)</td>
+            <td>"Open keyboard shortcuts" disclosure</td>
+            <td><code>group</code> (native <code>&lt;details&gt;</code>/<code>&lt;summary&gt;</code>) — unlike Long description below, this one also closes on <kbd>Esc</kbd> and when focus leaves it, since it's a popover-style trigger rather than a disclosure meant to stay open (see <a href="../../patterns/tooltips/index.html">Tooltips</a> for why the hover/focus tooltip is the one exception that doesn't close on <kbd>Esc</kbd>)</td>
+            <td><code>aria-label</code> on the <code>&lt;summary&gt;</code>: "Open keyboard shortcuts" (icon-only, same reasoning as the toggle above)</td>
             <td>n/a — expanded content (a table) is the reference itself</td>
           </tr>
           <tr>
@@ -411,7 +413,7 @@
       team-sourced catalog from real audits. Replace/extend as the team encounters real
       examples (see CLAUDE.md's sourcing note).
     </p>
-    <ul>
+    <ul class="text-columns">
       <li>
         <strong>Segments distinguished by color alone</strong>, with no pattern/texture
         and no text alternative — fails for colorblind users and anyone in
@@ -491,5 +493,6 @@
   </footer>
 
   <script type="module" src="script.js"></script>
+  <script type="module" src="../../js/site-nav.js"></script>
 </body>
 </html>
