@@ -282,6 +282,16 @@ button.toolbar-btn[aria-pressed="true"] {
 .chart-longdesc summary {
   cursor: pointer;
   font-weight: 600;
+  list-style: none;
+}
+
+/* Same reasoning as the main nav's dropdown caret (see base.css's
+   .nav-caret): an explicit, independently-sized/colored span instead of
+   the browser's native marker, reusing the exact same class so every
+   disclosure triangle on the site shares one visual treatment and one
+   color variable, not a one-off per element. */
+.chart-longdesc summary::-webkit-details-marker {
+  display: none;
 }
 
 .chart-longdesc p {

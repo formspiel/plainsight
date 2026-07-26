@@ -118,6 +118,18 @@ pre {
   transition: top 0.15s ease;
 }
 
+/* The global :focus-visible ring is --focus-ring, which resolves to the
+   same forest green as this element's own --accent background -- fine
+   everywhere else (every other focusable element sits on the page's
+   --bg/--surface, which contrasts against forest), but here the ring
+   and the fill it sits right against are the same color, so it reads as
+   one blurry blob instead of a distinct focus indicator. Override just
+   the color to --accent-contrast (white), which reads clearly against
+   the green fill regardless of theme. */
+.skip-link:focus-visible {
+  outline-color: var(--accent-contrast);
+}
+
 .skip-link:focus {
   top: 0.5rem;
 }
@@ -196,12 +208,13 @@ pre {
   display: none;
 }
 
-/* A real element, not a ::after glyph, specifically so it can carry its
-   own size and color independent of the summary's own text -- it's a
-   second signifier that this nav item opens a dropdown, alongside the
-   underline/no-underline distinction above, so it needs to actually
-   read as bigger, not just be present. Colored with the dark-mode-
-   specific forest tint
+/* A real element, not a ::after glyph or the browser's native marker,
+   specifically so it can carry its own size and color independent of
+   the summary's own text. Used for every <details>/<summary> disclosure
+   triangle on the site (nav dropdowns here, plus e.g. a chart's own
+   "Long description" -- see chart.css), not just nav, so there's one
+   shared visual treatment and one shared color variable instead of a
+   one-off per element. Colored with the dark-mode-specific forest tint
    (not --accent) because --accent is deliberately held constant for
    button fills (see tokens.css) and only clears ~3.2:1 against the dark
    surface -- fine for a button, tight for this. */
@@ -248,10 +261,34 @@ pre {
   max-width: 68ch;
 }
 
+/* WAI-ARIA APG breadcrumb pattern: <nav aria-label="Breadcrumb"><ol>...
+   https://www.w3.org/WAI/ARIA/apg/patterns/breadcrumb/examples/breadcrumb/
+   The current page is its own <li>, an <a aria-current="page"> per the
+   APG example (not plain text) -- separators are generated, not typed
+   into the markup, so they're never announced by AT. */
 .breadcrumb {
   font-size: 0.9rem;
-  color: var(--text-muted);
   margin-bottom: 1rem;
+}
+
+.breadcrumb ol {
+  display: flex;
+  flex-wrap: wrap;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.breadcrumb li {
+  display: flex;
+  align-items: center;
+  color: var(--text-muted);
+}
+
+.breadcrumb li:not(:last-child)::after {
+  content: "/";
+  margin: 0 0.4em;
+  color: var(--text-muted);
 }
 
 .breadcrumb a {

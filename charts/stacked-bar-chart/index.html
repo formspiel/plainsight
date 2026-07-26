@@ -14,7 +14,7 @@
 <body>
   <ul class="skip-links">
     <li><a class="skip-link" href="#main">Skip to content</a></li>
-    <li><a class="skip-link" href="#after-stacked-bar-demo">Skip chart demo</a></li>
+    <li><a class="skip-link" href="#stacked-bar-title">Skip to chart</a></li>
   </ul>
 
   <header class="site-header">
@@ -60,7 +60,13 @@
   </header>
 
   <main id="main" class="page">
-    <p class="breadcrumb"><a href="../../index.html">Home</a> / <a href="../../index.html#chart-types">Chart Types</a> / Stacked Bar Chart</p>
+    <nav aria-label="Breadcrumb" class="breadcrumb">
+      <ol>
+        <li><a href="../../index.html">Home</a></li>
+        <li><a href="../../index.html#chart-types">Chart Types</a></li>
+        <li><a href="" aria-current="page">Stacked Bar Chart</a></li>
+      </ol>
+    </nav>
 
     <h1>Stacked Bar Chart</h1>
     <p class="page-intro">
@@ -77,7 +83,7 @@
 
     <div id="stacked-bar-demo" class="chart-demo">
       <div class="chart-header">
-        <h3 id="stacked-bar-title">
+        <h3 id="stacked-bar-title" tabindex="-1">
           <span id="stacked-bar-chart-type" class="visually-hidden">Stacked bar chart: </span>
           Monthly Insurance Claims by Category, January 2023–June 2025
         </h3>
@@ -151,7 +157,7 @@
       <div id="stacked-bar-legend"></div>
 
       <details class="chart-longdesc">
-        <summary>Long description</summary>
+        <summary>Long description <span class="nav-caret" aria-hidden="true">▾</span></summary>
         <p>
           Auto Collision is the largest single category most months, holding fairly
           steady between about 17 and 27 claims. Weather &amp; Storm Damage swings the
@@ -168,7 +174,7 @@
       </details>
     </div>
 
-    <div id="after-stacked-bar-demo" class="callout" tabindex="-1">
+    <div class="callout">
       <p>
         This page is the template the rest of Plainsight's chart pages follow. If
         you're new here, start with <a href="../../getting-started/index.html">Getting
