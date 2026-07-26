@@ -144,14 +144,39 @@
         month. See the Open keyboard shortcuts button above for the full reference.
       </span>
 
-      <div id="stacked-bar-chart" class="chart-figure">
-        <noscript>
-          <p>
-            This chart requires JavaScript to render. In the meantime, see the
-            <a href="#stacked-bar-table">data table</a> below or
-            <a href="data.csv" download>download the CSV</a>.
-          </p>
-        </noscript>
+      <div class="chart-figure">
+        <div id="stacked-bar-chart" class="chart-scroll">
+          <div class="chart-canvas">
+            <noscript>
+              <p>
+                This chart requires JavaScript to render. In the meantime, see the
+                <a href="#stacked-bar-table">data table</a> below or
+                <a href="data.csv" download>download the CSV</a>.
+              </p>
+            </noscript>
+          </div>
+        </div>
+
+        <!-- Purely a sighted "there's more this way" signal for the
+             chart's own horizontal scroll below ~900px -- AT users already
+             have full access to every bar/segment via the hotspot layer's
+             Tab stop + arrow keys regardless of scroll position, so this
+             carries no information they don't already have. Shown/hidden
+             by wireScrollFades() in script.js based on actual scroll
+             position, not a fixed guess. The gradient alone would vanish
+             under forced-colors (background-image isn't rendered there),
+             so the chevron icon -- an actual stroked shape, not a
+             background -- is the part that still works when it matters. -->
+        <div class="chart-scroll-fade chart-scroll-fade--left" aria-hidden="true">
+          <svg class="chart-scroll-fade__icon" viewBox="0 0 20 20">
+            <path d="M12 5 L7 10 L12 15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </div>
+        <div class="chart-scroll-fade chart-scroll-fade--right" aria-hidden="true">
+          <svg class="chart-scroll-fade__icon" viewBox="0 0 20 20">
+            <path d="M8 5 L13 10 L8 15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </div>
       </div>
 
       <div id="stacked-bar-legend"></div>
@@ -453,9 +478,31 @@
         values the chart shows (e.g. category totals). (WCAG 1.3.1 Info and
         Relationships)
       </li>
+      <li>
+        <strong>Dense charts shrink to illegible size on small screens</strong> instead
+        of reflowing — the whole SVG scaling down with the viewport, rather than
+        keeping bars/labels at a legible minimum size and letting the chart scroll
+        horizontally past that point. This demo's own first pass did exactly this: at a
+        320px viewport the chart rendered at 280×146px for 30 months × 5 series, bars a
+        few pixels wide. Fixed here via a horizontal-scroll floor around the chart's own
+        legible size (see "Mobile / touch equivalent" below) — but it's a real, common
+        gap worth checking for specifically, since a chart that "looks fine" on a
+        desktop screenshot during an audit can fail this silently on mobile. (WCAG
+        1.4.10 Reflow)
+      </li>
     </ul>
 
     <h2>Mobile / touch equivalent</h2>
+    <p>
+      Below roughly 900px, the chart stops shrinking (30 months × 5 series has a real
+      legibility floor -- see the "Common failure patterns" note on this above) and
+      scrolls horizontally instead, at native touch-scroll/scrollbar behavior with no
+      custom gesture handling. A gradient-plus-chevron indicator at whichever edge has
+      more content is a sighted-only convenience (<code>aria-hidden</code>) signaling
+      "there's more this way"; it carries no information a keyboard or screen reader
+      user doesn't already have via the hotspot layer below, which reaches every bar
+      regardless of scroll position.
+    </p>
     <p>
       The hotspot buttons work as normal tap targets for sighted touch users, and are
       real focusable elements so switch-access and other assistive input methods reach

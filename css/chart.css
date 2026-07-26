@@ -1,13 +1,44 @@
 /* Shared styles for chart demo pages. */
 
+/* Outer, non-scrolling wrapper -- exists so the scroll-edge fades (further
+   down) can be pinned to the visible viewport's edges regardless of the
+   inner .chart-scroll's scroll position. Doesn't carry sizing itself;
+   that's all on .chart-canvas below. */
 .chart-figure {
   position: relative;
-  width: 100%;
-  aspect-ratio: 1000 / 520;
   margin: 1.5rem 0;
 }
 
+/* The actual horizontally-scrolling region. At 30 months x 5 series, the
+   chart doesn't get smaller with the viewport past a certain point --
+   below ~900px letting .chart-canvas keep its width and scrolling this
+   container (native touch/scrollbar/keyboard-focus-follows-scroll, no
+   custom scroll code needed) keeps every bar and axis label legible,
+   instead of the whole SVG shrinking to illegible slivers on a phone
+   (see GitHub issue #9 -- this is that fix). */
+.chart-scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+/* Carries the chart's real, fixed-minimum size. Both .chart-svg and
+   .chart-hotspots (below) are absolutely positioned to fill this element
+   exactly (inset: 0) -- sharing one explicitly-sized ancestor, rather
+   than each guessing their own size, is what keeps the invisible hotspot
+   buttons pixel-aligned with the visible bars at every scroll position
+   and every viewport width. 900px is not arbitrary: it's close to this
+   chart's own natural desktop-legible size (bars/labels already read
+   clearly there), so above it the chart still scales up to fill the
+   container exactly as before; only below it does scrolling kick in. */
+.chart-canvas {
+  position: relative;
+  width: max(100%, 900px);
+  aspect-ratio: 1000 / 520;
+}
+
 .chart-svg {
+  position: absolute;
+  inset: 0;
   display: block;
   width: 100%;
   height: 100%;
@@ -61,6 +92,50 @@
 .chart-hotspots {
   position: absolute;
   inset: 0;
+}
+
+/* "There's more this way" scroll signifiers -- see the HTML comment
+   above these two elements for why they're aria-hidden and why there's
+   both a gradient and an icon. Pinned to .chart-figure (the outer,
+   non-scrolling wrapper), not .chart-scroll, so they stay put at the
+   visible edges regardless of scroll position. */
+.chart-scroll-fade {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2.5rem;
+  display: flex;
+  align-items: center;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.chart-scroll-fade.is-visible {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .chart-scroll-fade {
+    transition: opacity 0.15s ease;
+  }
+}
+
+.chart-scroll-fade--left {
+  left: 0;
+  justify-content: flex-start;
+  background: linear-gradient(to right, var(--bg), transparent);
+}
+
+.chart-scroll-fade--right {
+  right: 0;
+  justify-content: flex-end;
+  background: linear-gradient(to left, var(--bg), transparent);
+}
+
+.chart-scroll-fade__icon {
+  width: 1.2rem;
+  height: 1.2rem;
+  color: var(--text-muted);
 }
 
 .hotspot {

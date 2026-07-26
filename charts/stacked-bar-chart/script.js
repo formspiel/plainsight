@@ -379,7 +379,7 @@ function wireKeyboardNav(layer) {
 // source of truth.
 // ---------------------------------------------------------------------
 
-function buildTooltip(container) {
+function buildTooltip(container, scrollBoundsEl) {
   const tooltip = document.createElement("div");
   tooltip.className = "chart-tooltip";
   tooltip.setAttribute("aria-hidden", "true");
@@ -404,16 +404,28 @@ function buildTooltip(container) {
     const anchorTop = targetRect.top - containerRect.top;
     const anchorBottom = anchorTop + targetRect.height;
 
+    // Clamp against the currently *visible* window (scrollBoundsEl, e.g.
+    // .chart-scroll), not just the container's own full box -- container
+    // can be wider than what's actually on screen once it's horizontally
+    // scrollable (see .chart-canvas), so clamping against its full width
+    // alone would let a tooltip sit outside the visible, scrolled area
+    // and get clipped by the scroll container's own overflow instead of
+    // staying on-screen. Falls back to the container's own bounds when
+    // there's nothing to scroll (e.g. the toolbar's tooltip).
+    const boundsRect = scrollBoundsEl ? scrollBoundsEl.getBoundingClientRect() : containerRect;
+    const visibleLeft = Math.max(0, boundsRect.left - containerRect.left);
+    const visibleRight = Math.min(containerRect.width, visibleLeft + boundsRect.width);
+
     // Horizontal: center on the target, then slide back inside the
-    // container bounds if that would push either edge past them --
+    // visible bounds if that would push either edge past them --
     // this is the actual fix, centering alone (via CSS transform) has
     // no awareness of the container edges at all.
     const maxLeft = Math.max(
-      EDGE_MARGIN,
-      containerRect.width - tooltipWidth - EDGE_MARGIN
+      visibleLeft + EDGE_MARGIN,
+      visibleRight - tooltipWidth - EDGE_MARGIN
     );
     const left = Math.min(
-      Math.max(anchorX - tooltipWidth / 2, EDGE_MARGIN),
+      Math.max(anchorX - tooltipWidth / 2, visibleLeft + EDGE_MARGIN),
       maxLeft
     );
 
@@ -462,6 +474,29 @@ function wireTooltip(layer, tooltip, selector = ".hotspot") {
   layer.addEventListener("mouseout", handleLeave);
   layer.addEventListener("focusin", handleEnter);
   layer.addEventListener("focusout", handleLeave);
+}
+
+// ---------------------------------------------------------------------
+// Scroll-edge fades: purely a sighted "there's more this way" signal for
+// the chart's own horizontal scroll below ~900px (see .chart-scroll in
+// chart.css). Driven by actual scroll position, not a fixed guess, so it
+// stays correct if the data or the container width ever changes. AT
+// users need nothing from this -- the hotspot layer already gives full
+// access to every bar regardless of scroll position.
+// ---------------------------------------------------------------------
+
+function wireScrollFades(scrollEl, leftFade, rightFade) {
+  if (!scrollEl || !leftFade || !rightFade) return;
+
+  function update() {
+    const maxScroll = scrollEl.scrollWidth - scrollEl.clientWidth;
+    leftFade.classList.toggle("is-visible", scrollEl.scrollLeft > 1);
+    rightFade.classList.toggle("is-visible", scrollEl.scrollLeft < maxScroll - 1);
+  }
+
+  scrollEl.addEventListener("scroll", update);
+  window.addEventListener("resize", update);
+  update();
 }
 
 // ---------------------------------------------------------------------
@@ -636,14 +671,22 @@ function renderDataTable(container) {
 // ---------------------------------------------------------------------
 
 document.addEventListener("DOMContentLoaded", () => {
-  const chartContainer = document.getElementById("stacked-bar-chart");
-  if (chartContainer) {
-    renderChart(chartContainer);
-    const layer = buildHotspotLayer(chartContainer);
+  const scrollContainer = document.getElementById("stacked-bar-chart");
+  const chartCanvas = scrollContainer?.querySelector(".chart-canvas");
+  if (chartCanvas) {
+    renderChart(chartCanvas);
+    const layer = buildHotspotLayer(chartCanvas);
     wireKeyboardNav(layer);
-    const tooltip = buildTooltip(chartContainer);
+    const tooltip = buildTooltip(chartCanvas, scrollContainer);
     wireTooltip(layer, tooltip);
   }
+
+  const chartFigure = document.querySelector(".chart-figure");
+  wireScrollFades(
+    scrollContainer,
+    chartFigure?.querySelector(".chart-scroll-fade--left"),
+    chartFigure?.querySelector(".chart-scroll-fade--right")
+  );
 
   const demoRoot = document.getElementById("stacked-bar-demo");
   const patternToggle = document.getElementById("stacked-bar-pattern-toggle");
