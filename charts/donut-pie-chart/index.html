@@ -4,14 +4,18 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Donut / Pie Chart — Plainsight</title>
-  <meta name="description" content="Part-to-whole, angle encoding. Also planned as the home for a 'should this even be a chart?' teaching moment — bar charts often communicate the same data more accessibly. Not yet built." />
+  <meta name="description" content="Expected keyboard operation and screen reader behavior for donut and pie charts." />
   <link rel="icon" href="../../favicon.svg" type="image/svg+xml" />
   <link rel="icon" href="../../favicon-32.png" sizes="32x32" type="image/png" />
   <link rel="stylesheet" href="../../css/tokens.css" />
   <link rel="stylesheet" href="../../css/base.css" />
+  <link rel="stylesheet" href="../../css/chart.css" />
 </head>
 <body>
-  <a class="skip-link" href="#main">Skip to content</a>
+  <ul class="skip-links">
+    <li><a class="skip-link" href="#main">Skip to content</a></li>
+    <li><a class="skip-link" href="#donut-title">Skip to chart</a></li>
+  </ul>
 
   <header class="site-header">
     <div class="site-header__inner">
@@ -63,14 +67,470 @@
         <li><a href="" aria-current="page">Donut / Pie Chart</a></li>
       </ol>
     </nav>
+
     <h1>Donut / Pie Chart</h1>
-    <p class="badge">Coming soon</p>
-    <p class="page-intro">Part-to-whole, angle encoding. Also planned as the home for a "should this even be a chart?" teaching moment — bar charts often communicate the same data more accessibly. Not yet built.</p>
+    <p class="page-intro">
+      A circle divided into wedges, each proportional to its share of the whole — angle
+      (and area) encoding, not position or length. Good for a small number of categories
+      where the reader's main question is "how does each part compare to the whole,"
+      not "what's the exact trend" or "how do these compare to each other in detail."
+    </p>
+
+    <h2>Live demo</h2>
+    <p>
+      One year of fictional insurance claims, by category — a single part-to-whole
+      snapshot, not a time series like the two bar charts. Tab into the chart, then use
+      the arrow keys described below.
+    </p>
+
+    <div id="donut-demo" class="chart-demo">
+      <div class="chart-header">
+        <h3 id="donut-title" class="chart-title" tabindex="-1">
+          <span id="donut-chart-type" class="visually-hidden">Donut chart: </span>
+          Insurance Claims by Category, 2025
+        </h3>
+
+        <div class="chart-toolbar" role="group" aria-label="Chart options">
+          <button
+            type="button"
+            id="donut-pattern-toggle"
+            class="toolbar-btn pattern-toggle"
+            aria-pressed="false"
+            aria-label="Toggle patterns"
+            data-tooltip="Toggle patterns"
+          >
+            <svg class="toolbar-btn__icon" viewBox="0 0 20 20" aria-hidden="true">
+              <rect x="3" y="3" width="14" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="1.5" />
+              <path d="M3 10 L10 3 M3 15 L15 3 M8 17 L17 8 M13 17 L17 13" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+            </svg>
+          </button>
+
+          <details class="keyboard-details">
+            <summary class="toolbar-btn" aria-label="Open keyboard shortcuts" data-tooltip="Open keyboard shortcuts">
+              <svg class="toolbar-btn__icon" viewBox="0 0 20 20" aria-hidden="true">
+                <rect x="2" y="5" width="16" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="1.5" />
+                <rect x="4.5" y="7.5" width="1.6" height="1.6" fill="currentColor" />
+                <rect x="7.5" y="7.5" width="1.6" height="1.6" fill="currentColor" />
+                <rect x="10.5" y="7.5" width="1.6" height="1.6" fill="currentColor" />
+                <rect x="13.5" y="7.5" width="1.6" height="1.6" fill="currentColor" />
+                <rect x="4.5" y="10.5" width="9" height="1.6" fill="currentColor" />
+              </svg>
+            </summary>
+            <div class="keyboard-panel">
+              <table>
+                <caption class="visually-hidden">Full keyboard shortcut reference</caption>
+                <tbody>
+                  <tr><th scope="row"><kbd>←</kbd>/<kbd>→</kbd></th><td>Move between categories</td></tr>
+                  <tr><th scope="row"><kbd>Home</kbd>/<kbd>End</kbd></th><td>Jump to the first/last category</td></tr>
+                  <tr><th scope="row"><kbd>Tab</kbd></th><td>Enter the chart, then leave it entirely (one Tab stop)</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </details>
+
+          <a class="toolbar-btn" href="data.csv" download aria-label="Download CSV" data-tooltip="Download CSV">
+            <svg class="toolbar-btn__icon" viewBox="0 0 20 20" aria-hidden="true">
+              <path d="M10 2.5 V12.5 M6 9 L10 13 L14 9" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+              <path d="M3.5 14.5 V16 a1 1 0 0 0 1 1 h11 a1 1 0 0 0 1 -1 v-1.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </a>
+        </div>
+      </div>
+
+      <span id="donut-instructions" class="visually-hidden">
+        Interactive chart with 6 categories. Use Left and Right arrow keys to move
+        between categories, Home and End to jump to the first or last. See the Open
+        keyboard shortcuts button above for the full reference.
+      </span>
+
+      <div id="donut-chart" class="chart-canvas chart-canvas--donut">
+        <noscript>
+          <p>
+            This chart requires JavaScript to render. In the meantime, see the
+            <a href="#donut-table">data table</a> below or
+            <a href="data.csv" download>download the CSV</a>.
+          </p>
+        </noscript>
+      </div>
+
+      <div id="donut-legend"></div>
+      <div id="donut-legend-status" class="visually-hidden" aria-live="polite"></div>
+
+      <details class="chart-longdesc">
+        <summary>Long description <span class="nav-caret" aria-hidden="true">▾</span></summary>
+        <p>
+          Auto Collision is by far the largest category, at 210 of 600 total claims
+          (35%) — more than the next two categories combined. Weather &amp; Storm
+          Damage is second at 130 claims (22%), followed by Water Damage
+          (Non-Weather) at 95 (16%) and Liability Claims at 78 (13%). Theft &amp;
+          Vandalism and Wildlife &amp; Unusual Incidents are the two smallest
+          categories, at 52 (9%) and 35 (6%) respectively — together barely more than
+          a third of Auto Collision alone.
+        </p>
+      </details>
+    </div>
+
+    <h2>When to use it</h2>
+    <p>
+      Use a donut or pie chart when there's a small number of categories (roughly
+      2–6) that genuinely sum to one meaningful whole, and the reader's main question
+      is about each part's <em>share</em> of that whole — "what fraction of total
+      claims is Auto Collision?" — not exact values or trends over time.
+    </p>
+    <p><strong>It's the wrong choice when:</strong></p>
+    <ul class="text-columns">
+      <li>
+        <strong>There are more than about 6–7 categories.</strong> This is a harder
+        ceiling than the Stacked Bar Chart's: a stacked bar's segments each still have
+        their own edge-to-edge height to compare, but a pie/donut's wedges only have
+        angle, and human angle-judgment gets unreliable fast once wedges get thin and
+        numerous. This demo's own six categories are close to that ceiling already —
+        a real "insurance claims by sub-type" breakdown with 15–20 categories would be
+        a textbook case for "should this even be a chart," not a design problem to
+        solve with smaller labels.
+      </li>
+      <li>
+        <strong>Readers need to compare two specific slices precisely</strong> (e.g.
+        "is Weather &amp; Storm Damage more or less than double Water Damage?"). Angle
+        comparison between two non-adjacent wedges is genuinely harder for the eye
+        than comparing two bars against a shared baseline — a bar chart communicates
+        the same underlying numbers more reliably for this specific question, even
+        though it loses the "this is a whole made of parts" framing a donut gives for
+        free.
+      </li>
+      <li>
+        <strong>The categories don't actually sum to a meaningful 100%.</strong> A
+        common misuse: plotting a survey question where respondents could pick
+        multiple options, so the "whole" the slices are supposed to add up to isn't
+        real. If the underlying total isn't meaningful, no amount of accessible
+        wiring fixes the chart choice itself.
+      </li>
+      <li>
+        Readers need to track this same breakdown changing <em>over time</em>. A
+        stacked bar chart (this site's first chart type) shows the same part-to-whole
+        relationship at every point along a time axis, which a single donut snapshot
+        can't.
+      </li>
+    </ul>
+
+    <h2>Interaction complexity tier</h2>
+    <p>
+      <strong>Exploratory.</strong> A reader can navigate to and get the exact value
+      and percentage of every individual category, not just an overall chart summary.
+      With only 6 categories this chart is far smaller than the two bar charts, but
+      the same reasoning applies: a single <code>role="img"</code> summary would still
+      strand keyboard and screen reader users below what a sighted user gets from
+      looking at the chart, so this demo implements full point-by-point navigation
+      here too.
+    </p>
+
+    <h2>Expected accessibility tree</h2>
+    <p>
+      Same top-level pattern as the bar charts: the visual <code>&lt;svg
+      aria-hidden="true"&gt;</code> is purely decorative, and all accessibility
+      semantics live in a parallel layer of real, focusable
+      <code>&lt;button&gt;</code> elements — one per wedge. What's different here: each
+      button's actual clickable area is clipped (via CSS <code>clip-path</code>) to
+      match its wedge's exact shape, not a rectangle — see "Common failure patterns"
+      below for why a plain rectangular hit area doesn't work well for wedge-shaped
+      targets.
+    </p>
+    <div class="data-table-wrapper">
+      <table>
+        <caption class="visually-hidden">Expected accessibility tree for the donut/pie chart</caption>
+        <thead>
+          <tr>
+            <th scope="col">Element</th>
+            <th scope="col">Role</th>
+            <th scope="col">Accessible name source</th>
+            <th scope="col">Description source</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Chart container</td>
+            <td><code>group</code></td>
+            <td><code>aria-labelledby</code>: the visible chart title (<code>&lt;h3&gt;</code>), plus a visually-hidden "Donut chart:" type prefix — same idiom as the bar charts, so the accessible name can't drift from what's on screen</td>
+            <td><code>aria-describedby</code>: one-time keyboard instructions (visually hidden — the toolbar's Open keyboard shortcuts button is the visible equivalent, see Live demo)</td>
+          </tr>
+          <tr>
+            <td>Category stop (one per visible wedge)</td>
+            <td><code>button</code> (native)</td>
+            <td>Text content: "Auto Collision: 210 claims, 35% of 600 total claims." — the total is spelled out, not just the percentage, the same reasoning the Stacked Bar Chart uses for its own segment stops</td>
+            <td>None — name is self-contained</td>
+          </tr>
+          <tr>
+            <td>Center total label</td>
+            <td><code>aria-hidden="true"</code> — not in the tree</td>
+            <td>n/a</td>
+            <td>n/a — the total is already spoken as part of every category stop's own name above; this is a sighted-only summary, not a second source of that number</td>
+          </tr>
+          <tr>
+            <td>Percentage label on each wedge</td>
+            <td><code>aria-hidden="true"</code> — not in the tree</td>
+            <td>n/a</td>
+            <td>n/a — same reasoning as the center label: duplicates what the category stop's own name already says</td>
+          </tr>
+          <tr>
+            <td>Tooltip (hover/focus)</td>
+            <td><code>aria-hidden="true"</code> — not in the tree</td>
+            <td>n/a</td>
+            <td>n/a — duplicates the hotspot's own accessible name for sighted users only, same as the bar charts</td>
+          </tr>
+          <tr>
+            <td>Chart toolbar, its three buttons, and the Long description disclosure</td>
+            <td>Identical mechanism to the bar charts'</td>
+            <td>See <a href="../../charts/stacked-bar-chart/index.html">Stacked Bar Chart</a>'s own table for the full rationale — not repeated here</td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td>Legend entry (one per category)</td>
+            <td><code>button</code> (native), toggle category visibility via <code>aria-pressed</code></td>
+            <td>Text content: the category name — same idiom as the bar charts' legends</td>
+            <td>None — state is on the element itself via <code>aria-pressed</code>. When only one category remains visible, its button gets <code>aria-disabled="true"</code>, same rule as the bar charts</td>
+          </tr>
+          <tr>
+            <td>Legend status region</td>
+            <td><code>aria-live="polite"</code>, visually hidden</td>
+            <td>n/a</td>
+            <td>Announces what just changed on every toggle — needed because hiding a category changes every other wedge's own percentage without moving focus anywhere to trigger a fresh announcement on its own</td>
+          </tr>
+          <tr>
+            <td>Data table fallback</td>
+            <td><code>table</code>, sortable column headers as <code>button</code> inside <code>th</code></td>
+            <td>Column <code>&lt;th&gt;</code> text; row <code>&lt;th scope="row"&gt;</code> = category name</td>
+            <td><code>aria-sort</code> on each sortable <code>&lt;th&gt;</code></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>Keyboard pattern</h2>
+    <p>
+      The whole chart is a single Tab stop, same as both bar charts. Unlike the
+      Stacked Bar Chart, there's no hierarchy to move through — every wedge sits at
+      the same level, so Left/Right alone cover the whole chart (closer to the Double
+      Bar Graph's flatter model than the Stacked Bar Chart's bar-summary-plus-segment
+      one).
+    </p>
+    <div class="data-table-wrapper">
+      <table>
+        <caption class="visually-hidden">Keyboard pattern for the donut/pie chart</caption>
+        <thead>
+          <tr>
+            <th scope="col">Key</th>
+            <th scope="col">Expected behavior</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row">Tab</th><td>Moves focus into the chart, landing on whichever category was last focused (Auto Collision, initially). Moves focus out entirely on the way back — this is one Tab stop, not six.</td></tr>
+          <tr><th scope="row">Shift+Tab</th><td>Moves focus out of the chart, backward.</td></tr>
+          <tr><th scope="row">Right Arrow</th><td>Moves to the next category, clockwise around the ring. No-ops at the last category.</td></tr>
+          <tr><th scope="row">Left Arrow</th><td>Moves to the previous category, counterclockwise. No-ops at the first category.</td></tr>
+          <tr><th scope="row">Home</th><td>Jumps to the first category (Auto Collision).</td></tr>
+          <tr><th scope="row">End</th><td>Jumps to the last category (Theft &amp; Vandalism).</td></tr>
+          <tr><th scope="row">Tab / Enter or Space</th><td>Each legend entry is its own standalone Tab stop (not part of the chart's roving group) — Enter or Space toggles it.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>Legend as a filter</h2>
+    <p>
+      Same idiom as both bar charts (see the
+      <a href="../../charts/stacked-bar-chart/index.html">Stacked Bar Chart</a>'s own
+      "Legend as a filter" for the fuller rationale), applied to angle instead of bar
+      height: hiding a category recomputes every remaining wedge's angle from
+      scratch, so they expand to fill the freed-up 360° — the same "re-stack" idea,
+      just around a ring instead of up a column. The hidden category's wedge and
+      hotspot are removed from the DOM entirely, the center total updates to match
+      what's actually shown, and the one category remaining visible (if everything
+      else is hidden) can't be turned off, locked via <code>aria-disabled</code>
+      rather than disappearing from the tab order. The data table fallback is
+      deliberately <strong>not</strong> affected by this filter, same as both bar
+      charts. This is one implementation of the general
+      <a href="../../patterns/legends-as-filters/index.html">Legends as Filters</a>
+      cross-cutting pattern.
+    </p>
+
+    <h2>Screen reader behavior</h2>
+    <p>
+      Because every navigable stop is a real, focusable <code>&lt;button&gt;</code>,
+      moving focus is enough to trigger a standard AT announcement — role, name, and
+      nothing else, the same reasoning as both bar charts. The one-time instructions
+      are attached via <code>aria-describedby</code> and are also visible on screen
+      (see the hint above the chart), not just exposed to AT.
+    </p>
+    <p>
+      As with both bar charts, toggling a legend entry doesn't move focus anywhere,
+      so the visually-hidden <code>aria-live="polite"</code> region is what carries
+      the news that a category was hidden or shown (and, implicitly, that every
+      remaining category's percentage just changed too).
+    </p>
+
+    <h3>Verified SR × browser matrix</h3>
+    <p>
+      This page is new — none of the following has been verified against real
+      assistive technology yet. Marked honestly rather than omitted, per the site's
+      own standard (see <a href="../../verified-against/index.html">Verified
+      Against</a>).
+    </p>
+    <div class="data-table-wrapper">
+      <table>
+        <caption class="visually-hidden">Verified screen reader and browser combinations for the donut/pie chart</caption>
+        <thead>
+          <tr>
+            <th scope="col">Screen reader</th>
+            <th scope="col">Browser</th>
+            <th scope="col">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row">JAWS</th><td>Edge</td><td>Not yet verified</td></tr>
+          <tr><th scope="row">NVDA</th><td>Edge</td><td>Not yet verified</td></tr>
+          <tr><th scope="row">NVDA</th><td>Firefox</td><td>Not tested in our environment (Firefox unavailable) — not yet verified elsewhere either</td></tr>
+          <tr><th scope="row">VoiceOver</th><td>macOS Safari</td><td>Not yet verified</td></tr>
+          <tr><th scope="row">VoiceOver</th><td>iOS Safari</td><td>Not yet verified — the clip-path-shaped hit targets (see "Common failure patterns") are specifically worth re-checking on a real device once this happens</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>Data table fallback</h2>
+    <p>
+      Same dataset, sortable by any column. This is a genuine parallel option for
+      readers who want exact values — not a replacement for the chart above. (CSV
+      download is in the chart's own toolbar, in the Live demo section above.)
+    </p>
+    <div id="donut-table-wrapper" class="data-table-wrapper">
+      <table id="donut-table">
+        <caption>Insurance claims by category, 2025</caption>
+        <thead>
+          <tr>
+            <th scope="col" data-sort-key="name" aria-sort="none"><button type="button">Category</button></th>
+            <th scope="col" data-sort-key="value" aria-sort="descending"><button type="button">Claims</button></th>
+            <th scope="col" data-sort-key="pct" aria-sort="none"><button type="button">% of total</button></th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <h2>Common failure patterns seen in audits</h2>
+    <p>
+      Seeded with well-known, representative failures to start this page — not yet a
+      team-sourced catalog from real audits. Replace/extend as the team encounters
+      real examples (see CLAUDE.md's sourcing note).
+    </p>
+    <ul class="text-columns">
+      <li>
+        <strong>A rectangular (or worse, invisible-centroid-dot) hit target for a
+        wedge-shaped slice.</strong> A plain rectangle sized to a wedge's bounding box
+        either overlaps into neighboring slices (if sized generously) or leaves real
+        parts of a large wedge unclickable (if sized conservatively) — and a small
+        fixed-size dot at each wedge's centroid has the opposite problem: too small
+        for a large slice's generous visual area, and prone to sitting outside a very
+        thin slice's actual bounds entirely. This demo instead clips each hotspot's
+        hit area to the exact same arc path the visible wedge is drawn with (see
+        "Expected accessibility tree" above) — worth checking for specifically any
+        time a chart's interactive targets are anything other than a plain rectangle.
+        (WCAG 2.5.5 Target Size is about size, not shape, but a mismatched hit shape
+        is a closely related, easy-to-miss usability failure with no SC of its own.)
+      </li>
+      <li>
+        <strong>A contrast palette computed for a linear list, reused unchecked on a
+        ring.</strong> Found while building this very demo: a 5-color high-contrast
+        palette already computed so every adjacent pair clears 3:1 in a stacked bar
+        (where the first and last segments are never actually next to each other)
+        turned out to fail badly — 1.09:1 — on the one pair a ring adds that a stack
+        never has: the wrap between the last slice and the first. Fixed here by
+        choosing where the new sixth category sits in the ring specifically to avoid
+        that pair, not by patching the color values themselves (see tokens.css's own
+        comment on <code>--series-6</code>). Worth checking for specifically any time
+        an existing categorical palette gets reused on a new chart shape. (WCAG
+        1.4.11 Non-text Contrast)
+      </li>
+      <li>
+        <strong>Too many slices, full stop.</strong> Unlike a stacked bar (which
+        degrades gracefully to a legend/keyboard-navigation slog past 5–6 segments,
+        see that page's own "When to use it"), a pie/donut's core visual promise —
+        judge each part's share at a glance — breaks down well before that, once
+        wedges get thin enough that angle-judgment itself becomes unreliable for
+        every user, sighted or not. No amount of accessible wiring fixes a chart type
+        that was the wrong choice for the data (see "When to use it" above). (Not a
+        single WCAG SC — this is a chart-choice problem accessible engineering can't
+        solve after the fact.)
+      </li>
+      <li>
+        <strong>Segments distinguished by color alone</strong>, with no pattern/texture
+        and no text alternative — fails for colorblind users and anyone in
+        high-contrast/grayscale contexts, same as every chart on this site. (WCAG
+        1.4.1 Use of Color)
+      </li>
+      <li>
+        <strong>Percentage labels shown only on hover</strong>, with no keyboard path
+        to them and no equivalent in a data table — a sighted mouse user gets exact
+        shares, everyone else is left estimating wedge angle by eye. This demo shows
+        percentage labels directly on large-enough wedges as a sighted convenience,
+        but the real value lives in each hotspot's own accessible name and the data
+        table regardless of hover. (WCAG 2.1.1 Keyboard, 1.1.1 Non-text Content)
+      </li>
+      <li>
+        <strong>A data table fallback exists but isn't a real equivalent</strong> —
+        missing column/row headers, not actually reachable via keyboard, or omitting
+        values the chart shows (e.g. each category's percentage share, not just its
+        raw count). (WCAG 1.3.1 Info and Relationships)
+      </li>
+      <li>
+        <strong>An interactive legend that only changes color, not keyboard/SR
+        reachability</strong> — same shortcut, same fix, as both bar charts (see the
+        Stacked Bar Chart's own "Common failure patterns" for the fuller
+        explanation). (WCAG 4.1.2 Name, Role, Value)
+      </li>
+    </ul>
+
+    <h2>Mobile / touch equivalent</h2>
+    <p>
+      This chart doesn't need the bar charts' horizontal-scroll floor at all: 6
+      categories stay legible shrunk to a normal responsive width, unlike 30 months
+      of dense bar data, which has a real legibility floor a shrinking viewport blows
+      straight past. The chart canvas simply scales down like an ordinary responsive
+      image, no scroll container involved.
+    </p>
+    <p>
+      The clip-path-shaped hotspot buttons (see "Common failure patterns" above) work
+      as normal tap targets — modern mobile browsers hit-test a
+      <code>clip-path</code>-clipped element against its clipped shape, not its full
+      box, the same way desktop Chrome/Firefox/Safari do. This is specifically flagged
+      as "not yet verified" in the SR × browser matrix above rather than assumed,
+      since it's a newer, less commonly-relied-on technique than the bar charts'
+      plain rectangular hotspots.
+    </p>
+    <p>
+      The toolbar's hover/focus tooltip is suppressed on touch, the chart's own
+      data-point tooltip is not — identical reasoning and identical mechanism to both
+      bar charts (see the Stacked Bar Chart's own "Mobile / touch equivalent" for the
+      full explanation).
+    </p>
+
+    <h2>Library notes</h2>
+    <p>
+      Plain links for v1 — no accessibility verdict yet (see
+      <a href="https://github.com/formspiel/plainsight/issues/1">tracking issue</a>).
+    </p>
+    <ul>
+      <li><a href="https://www.highcharts.com/">Highcharts</a></li>
+      <li><a href="https://www.chartjs.org/">Chart.js</a></li>
+      <li><a href="https://d3js.org/">D3</a></li>
+      <li><a href="https://echarts.apache.org/">ECharts</a></li>
+      <li><a href="https://recharts.org/">Recharts</a></li>
+      <li><a href="https://nivo.rocks/">Nivo</a></li>
+    </ul>
   </main>
 
   <footer class="site-footer">
     <p>Plainsight — a chart accessibility pattern reference. <a href="https://github.com/formspiel/plainsight">Source on GitHub</a>.</p>
   </footer>
+
+  <script type="module" src="script.js"></script>
   <script type="module" src="../../js/site-nav.js"></script>
 </body>
 </html>

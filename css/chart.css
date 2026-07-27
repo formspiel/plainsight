@@ -603,6 +603,178 @@ button.toolbar-btn[aria-pressed="true"] {
   }
 }
 
+/* ---------- Donut / Pie Chart specifics ----------
+   Everything above this point is shared with the bar charts unchanged.
+   This chart doesn't need the bar charts' horizontal-scroll-floor
+   machinery (.chart-scroll/.chart-figure/.chart-scroll-fade) at all: that
+   exists because 30 months x 5 series has a real legibility floor a
+   shrinking viewport blows past, but 6 slices stay legible shrunk to a
+   normal responsive width -- a low-cardinality part-to-whole chart
+   genuinely doesn't have the same mobile problem a dense time series
+   does, not an oversight. */
+.chart-canvas--donut {
+  position: relative;
+  width: 100%;
+  max-width: 26rem;
+  aspect-ratio: 1 / 1;
+  margin: 0 auto;
+  /* Establishes a query container sized to this element's own rendered
+     box -- .chart-hotspots--donut below reads that size back via cqw to
+     scale its fixed 500x500 (viewBox-unit) coordinate space down to
+     whatever this element actually renders at, the same uniform scaling
+     an SVG's own viewBox does automatically for the visual slices. */
+  container-type: size;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .chart-slice-group {
+    /* view-box, not the bar charts' fill-box: each slice's own bounding
+       box has a different center (off toward one edge of the ring), so
+       fill-box's origin would scale every slice from ITS OWN centroid,
+       not the donut's shared center -- view-box anchors the percentage
+       origin to the SVG viewport itself (0,0 to 500,500), so 50% 50%
+       resolves to the actual center point every slice should grow out
+       from together. */
+    transform-box: view-box;
+    transform-origin: 50% 50%;
+    animation: chart-slice-grow 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  @keyframes chart-slice-grow {
+    from {
+      transform: scale(0);
+    }
+    to {
+      transform: scale(1);
+    }
+  }
+}
+
+.chart-donut-slice {
+  stroke: var(--series-stroke);
+  stroke-width: 2;
+}
+
+/* Synced from the invisible hotspot's own focus/hover state (see
+   wireSegmentHighlight in script.js) -- this, not a native outline on the
+   hotspot button itself, is this chart's actual focus/hover indicator.
+   See .hotspot--donut below for why the button's own outline is
+   suppressed instead of just left as a (wrongly-shaped) second one. */
+.chart-donut-slice--active {
+  stroke: var(--focus-ring);
+  stroke-width: 4;
+}
+
+.chart-donut-label {
+  fill: var(--accent-contrast);
+  font-size: 15px;
+  font-weight: 600;
+  font-family: system-ui, sans-serif;
+  paint-order: stroke;
+  stroke: rgb(0 0 0 / 0.35);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+
+.chart-donut-center__total {
+  fill: var(--text);
+  font-size: 32px;
+  font-weight: 700;
+  font-family: system-ui, sans-serif;
+}
+
+.chart-donut-center__label {
+  fill: var(--text-muted);
+  font-size: 13px;
+  font-family: system-ui, sans-serif;
+}
+
+/* Fixed 500x500 intrinsic box, scaled down to the canvas's actual
+   rendered size via container query units -- see .chart-canvas--donut
+   above for why. Every hotspot child (below) shares this same 500x500
+   coordinate space, so their clip-path `d` strings can reuse the exact
+   viewBox-unit path the visible slice itself is drawn with, with no
+   separate unit conversion. */
+.chart-hotspots--donut {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 500px;
+  height: 500px;
+  transform-origin: top left;
+  transform: scale(calc(100cqw / 500px));
+}
+
+.hotspot--donut {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* The native :focus-visible/hover outline (see .hotspot in base rules and
+   :focus-visible in base.css) always follows the button's own border-box
+   -- for every other hotspot on the site that box IS the visible shape,
+   but here the box is the full 500x500 canvas and clip-path is what
+   actually restricts it to one wedge, so that outline would draw a
+   rectangle around the WHOLE chart on every hover/focus, not just the
+   hovered slice. Suppressed here specifically; replaced by
+   .chart-donut-slice--active above, which traces the real wedge shape. */
+.hotspot--donut:hover,
+.hotspot--donut:focus-visible {
+  outline: none;
+}
+
+/* Sixth legend swatch pattern (grid), needed only because this chart has
+   a sixth series -- horizontal + vertical together, distinct from
+   crosshatch's diagonal cross (data-pattern="3" above). */
+.patterns-visible .chart-legend__swatch[data-pattern="6"] {
+  background-image: repeating-linear-gradient(
+      to bottom,
+      var(--pattern-stroke) 0,
+      var(--pattern-stroke) 1.2px,
+      transparent 1.2px,
+      transparent 8px
+    ),
+    repeating-linear-gradient(
+      to right,
+      var(--pattern-stroke) 0,
+      var(--pattern-stroke) 1.2px,
+      transparent 1.2px,
+      transparent 8px
+    );
+}
+
+@media (forced-colors: active) {
+  .chart-legend__swatch[data-pattern="6"] {
+    forced-color-adjust: none;
+    background-image: repeating-linear-gradient(
+        to bottom,
+        var(--pattern-stroke) 0,
+        var(--pattern-stroke) 1.2px,
+        transparent 1.2px,
+        transparent 8px
+      ),
+      repeating-linear-gradient(
+        to right,
+        var(--pattern-stroke) 0,
+        var(--pattern-stroke) 1.2px,
+        transparent 1.2px,
+        transparent 8px
+      );
+  }
+
+  /* forced-colors flattens --accent-contrast/--text toward the system
+     palette same as everything else -- the label's own dark-stroke
+     halo (for legibility against an arbitrary fill color) stops being
+     meaningful once fill colors are system-controlled, so let Canvas-
+     appropriate text color win instead of forcing the halo's assumption. */
+  .chart-donut-label {
+    forced-color-adjust: none;
+    fill: CanvasText;
+    stroke: Canvas;
+  }
+}
+
 /* Sortable data table header buttons */
 th[data-sort-key] {
   padding: 0;
