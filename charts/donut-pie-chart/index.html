@@ -467,16 +467,19 @@
       </li>
       <li>
         <strong>A contrast palette computed for a linear list, reused unchecked on a
-        ring.</strong> Found while building this very demo: a 5-color high-contrast
-        palette already computed so every adjacent pair clears 3:1 in a stacked bar
-        (where the first and last segments are never actually next to each other)
-        turned out to fail badly — 1.09:1 — on the one pair a ring adds that a stack
-        never has: the wrap between the last slice and the first. Fixed here by
-        choosing where the new sixth category sits in the ring specifically to avoid
-        that pair, not by patching the color values themselves (see tokens.css's own
-        comment on <code>--series-6</code>). Worth checking for specifically any time
-        an existing categorical palette gets reused on a new chart shape. (WCAG
-        1.4.11 Non-text Contrast)
+        ring.</strong> Found while building this very demo (before this page's own
+        palette redesign): a 5-color high-contrast palette already computed so every
+        adjacent pair clears 3:1 in a stacked bar (where the first and last segments
+        are never actually next to each other) turned out to fail badly — 1.09:1 —
+        on the one pair a ring adds that a stack never has: the wrap between the last
+        slice and the first. Fixed at the time by choosing where the sixth category
+        sat in the ring specifically to avoid that pair, not by patching the color
+        values themselves. The lesson carried forward into the current palette's own
+        contrast-more computation (see tokens.css's "High contrast" comment): every
+        one of the ring's 6 colors is placed with the wrap pair in mind from the
+        start now, not patched in after the fact. Worth checking for specifically
+        any time an existing categorical palette gets reused on a new chart shape.
+        (WCAG 1.4.11 Non-text Contrast)
       </li>
       <li>
         <strong>Too many slices, full stop.</strong> Unlike a stacked bar (which

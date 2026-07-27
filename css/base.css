@@ -10,6 +10,30 @@ html {
   color-scheme: light dark;
 }
 
+/* Self-hosted, not a Google Fonts <link> -- keeps "no external font
+   loading" true in spirit even though the letter of "system font stack"
+   now has one exception (headings only, see below; body text stays
+   system-ui). One local file backs both weight declarations below: this
+   Fraunces build is a variable font, and Google's own served CSS points
+   both a 600 and a 700 @font-face at the identical file, letting the
+   browser resolve each declared weight from the font's own internal
+   weight axis rather than needing two separate static files. */
+@font-face {
+  font-family: "Fraunces";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("../fonts/fraunces-variable.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Fraunces";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("../fonts/fraunces-variable.woff2") format("woff2");
+}
+
 body {
   margin: 0;
   background: var(--bg);
@@ -23,10 +47,16 @@ main {
   display: block;
 }
 
+/* Headings only, not body text (see body's own font-family above) --
+   Fraunces as a display/heading face, system stack as the fallback if
+   the self-hosted file fails to load for any reason (font-display: swap
+   means text is never invisible while waiting either way). */
 h1,
 h2,
 h3,
 h4 {
+  font-family: "Fraunces", Georgia, serif;
+  font-weight: 700;
   line-height: 1.2;
   color: var(--text);
 }
@@ -85,9 +115,17 @@ pre {
   overflow-x: auto;
 }
 
+/* Width/offset tokenized (see tokens.css), not hardcoded -- the ring gets
+   visibly thicker and sits further out under prefers-contrast: more
+   (2px/2px normally, 3px/3px there), a real improvement over a single
+   fixed size for every contrast tier. No border-radius here: an outline
+   already follows its target's own border-radius by default in every
+   evergreen browser, so a separate --focus-ring-radius token would only
+   matter for a target that deliberately wants a DIFFERENT radius than
+   its own -- nothing on this site does. */
 :focus-visible {
-  outline: 3px solid var(--focus-ring);
-  outline-offset: 2px;
+  outline: var(--focus-ring-width) solid var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
 }
 
 .visually-hidden {
@@ -241,10 +279,10 @@ pre {
    triangle on the site (nav dropdowns here, plus e.g. a chart's own
    "Long description" -- see chart.css), not just nav, so there's one
    shared visual treatment and one shared color variable instead of a
-   one-off per element. Colored with the dark-mode-specific forest tint
-   (not --accent) because --accent is deliberately held constant for
-   button fills (see tokens.css) and only clears ~3.2:1 against the dark
-   surface -- fine for a button, tight for this. */
+   one-off per element. Colored with the dark-mode-specific accent tint
+   (not --accent itself) because --accent is deliberately held constant
+   for button fills (see tokens.css) and only clears ~2.2:1 against the
+   dark surface -- fine for a button, too tight for this. */
 .nav-caret {
   display: inline-block;
   margin-left: 0.2em;
@@ -255,7 +293,7 @@ pre {
 
 @media (prefers-color-scheme: dark) {
   .nav-caret {
-    color: var(--color-forest-tint);
+    color: var(--color-accent-tint);
   }
 }
 

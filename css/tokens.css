@@ -2,128 +2,134 @@
   Design tokens: one custom-property layer, themed via prefers-color-scheme
   and prefers-contrast / forced-colors media queries (no JS theme toggle).
 
-  Brand palette (fixed, given): sage, terracotta, cream, forest.
-  Everything else (neutrals, two extra chart-series hues, semantic aliases)
-  is derived from those four and documented inline.
+  REDESIGN (this file): values remapped from a new shared palette developed
+  for Plainsight and its sibling project native-form-elements together (an
+  earthy terracotta/ochre/sage/forest/teal/steel/plum/taupe palette). The
+  MECHANISM is unchanged on purpose -- the new palette's own source design
+  used JS-set data-mode/data-contrast attributes plus a visible toggle UI;
+  that's a real regression from this site's zero-JS, OS-preference-driven
+  theming (and conflicts with this project's own stance on minimizing JS
+  for basic functionality), so only the color *values* were adopted here,
+  routed through the exact same media-query structure as before. The new
+  source's manually-selectable "high contrast" theme tier is therefore NOT
+  present here -- this stays a 2-tier system (prefers-contrast: more +
+  forced-colors: active), same shape as before the redesign.
+
+  Chart series went from 6 colors to a pick of 6 (of the new source's 8) --
+  every WCAG 1.4.11 adjacent-pair number below is freshly measured against
+  the NEW hues, not carried over from the old palette's numbers (which are
+  still quoted, now-stale, in earlier chart-page prose -- update those
+  alongside this file).
 */
 
 :root {
   /* ---- Brand palette ----
-     "A-lite": a 50/50 blend of the original brand colors and a more
-     saturated "warm boost" candidate, picked after a design review round
-     to read as designed/vibrant without losing the warm-earthy character.
-     Same hue angles as the original palette throughout -- only lightness
-     and saturation moved. */
-  --color-sage: #a1a968;
-  --color-terracotta: #b57648;
-  --color-cream: #f5d8ad;
-  --color-forest: #4a7b4e;
+     Same reasoning as the previous palette: named for the hue, not a
+     role, since several get reused as both a UI role AND a chart series
+     color (e.g. --color-teal is both the Water Damage series color and
+     visually close to --link's own hue). */
+  --color-terracotta: #c24447;
+  --color-ochre: #a98440;
+  --color-sage: #779075;
+  --color-teal: #199a90;
+  --color-steel: #3f8392;
+  --color-plum: #8c5a6b;
 
-  /* ---- Extra hues, added only because 5 chart series need distinct,
-     non-adjacent hues and the brand palette has two greens (sage/forest)
-     that sit too close together for series 3+4. Named for what they add,
-     not for looks. ---- */
-  --color-slate-blue: #547ca7; /* water-coded, for the Water Damage series */
-  --color-plum: #945071; /* fifth series hue, kept out of the green family */
-  /* Sixth series hue, added for the Donut/Pie Chart (its "Theft &
-     Vandalism" category doesn't exist on the bar charts) -- indigo sits in
-     the widest open gap in the existing hue wheel (between slate-blue's
-     ~209° and plum's ~332°), so it reads as distinct from all five
-     existing series colors, not just its own two ring-neighbors. */
-  --color-indigo: #6d5095;
+  /* ---- Neutrals ---- */
+  --color-paper: #f9f6f0; /* light-theme background */
+  --color-paper-raised: #ffffff; /* light-theme surface */
+  --color-hairline-light: #e3ddcf;
+  --color-heading-light: #2c332a; /* also used for body text -- see --text below */
+  --color-muted-light: #647560;
 
-  /* ---- Neutrals, derived for text/background/border use the four brand
-     colors can't safely cover (none of them work as body text or as a
-     background at AA contrast in both themes). ---- */
-  --color-ink: #211e1a; /* near-black, warm-neutral body text (light theme) */
-  --color-ink-muted: #4b4740;
-  --color-paper: #fbf8f1; /* near-white, warm-neutral background (light theme) */
-  --color-paper-raised: #ffffff;
-  --color-border-light: #d8d2c4;
+  --color-coal: #21261d; /* dark-theme background */
+  --color-coal-raised: #3a4432; /* dark-theme surface */
+  --color-hairline-dark: #3a4132;
+  --color-heading-dark: #f4f1e8;
+  --color-muted-dark: #9d9371;
 
-  --color-snow: #f3efe6; /* near-white body text (dark theme) */
-  --color-snow-muted: #c9c3b4;
-  --color-coal: #16181a; /* near-black background (dark theme) */
-  --color-coal-raised: #1f221d;
-  --color-border-dark: #3a3d34;
+  /* Link hue (steel-teal) deepened for light-theme visited use, and
+     lightened for dark-theme visited use -- same "shade for light theme,
+     tint for dark theme" idiom the previous palette used, computed fresh:
+     light link vs light bg is 4.82:1, this deepened value is 8.20:1 (still
+     comfortably AA, clearly distinguishable); dark link vs dark bg is
+     5.48:1, this lightened value is 7.41:1. */
+  --color-link-visited-light: #265059;
+  --color-link-visited-dark: #82bdc9;
 
-  /* Lightened forest, used only for the Weather & Storm Damage chart
-     segment in dark mode (--series-2) -- raw --color-forest already
-     clears the 3:1 non-text minimum against --color-coal (3.59:1), this
-     just gives it more presence as a chart fill. NOT used for --link:
-     see the note on --color-plum-tint below for why a color lightened for
-     dark-background presence and a color lightened for dark-background
-     *text* contrast are two different jobs. */
-  --color-forest-tint: #53ac5a;
-  /* Lightened plum, for --link/badge use on dark backgrounds specifically
-     -- raw --color-plum only clears 3.09:1 against --color-coal, well
-     under the 4.5:1 text needs. This is deliberately a separate token
-     from a hypothetical "chart fill" tint: a button's fill color must
-     stay constant across themes (see tokens below, --accent), because
-     the lightening that makes a color readable as dark-mode text is
-     exactly what makes it too light to hold white button text underneath
-     -- --color-forest at 4.96:1 vs white would drop to ~2.8:1 if lightened
-     the way --color-plum-tint is here. */
-  --color-plum-tint: #b06d8e;
-  /* Deepened plum for light-theme visited-link use, distinguishable from
-     --color-plum without leaving the brand family. */
-  --color-plum-shade: #854262;
-  /* Lightened indigo, for --series-6 in dark mode specifically -- raw
-     --color-indigo only clears 2.74:1 against --color-coal, under the 3:1
-     non-text minimum every other series color already clears there
-     unlit (see --color-forest-tint above for the same job on series-2). */
-  --color-indigo-tint: #825bb9;
+  /* Lightened accent (--primary-bg's hue), for decorative/text use against
+     the dark surface specifically (e.g. .nav-caret in base.css) -- raw
+     accent only clears 2.21:1 there (even tighter than the previous
+     palette's forest-on-dark-surface case), this clears 3.90:1. NOT used
+     for the accent/button-fill role itself, which stays constant across
+     themes (see --accent below) for the same reason the previous palette
+     kept --color-forest constant: a button fill lightened enough to read
+     as dark-mode text would drop below AA against white button text. */
+  --color-accent-tint: #8fa68c;
+  /* Lightened plum, for --badge--done text/border use on dark backgrounds
+     specifically -- raw --color-plum only clears 2.79:1 against
+     --color-coal, under the 4.5:1 text minimum (same job
+     --color-plum-tint did for the previous palette, recomputed for the
+     new plum hue). */
+  --color-plum-tint: #af8392;
 }
 
 /* ---------- Light theme (default) ---------- */
 :root {
   --bg: var(--color-paper);
   --surface: var(--color-paper-raised);
-  --text: var(--color-ink);
-  --text-muted: var(--color-ink-muted);
-  --border: var(--color-border-light);
-  --link: var(--color-plum);
-  --link-visited: var(--color-plum-shade);
-  --focus-ring: var(--color-forest);
-  --accent: var(--color-forest);
+  --text: var(--color-heading-light);
+  --text-muted: var(--color-muted-light);
+  --border: var(--color-hairline-light);
+  --link: #387583;
+  --link-visited: var(--color-link-visited-light);
+  --focus-ring: #a98440;
+  --focus-ring-width: 2px;
+  --focus-ring-offset: 2px;
+  --accent: #637b60;
   --accent-contrast: #ffffff;
 
   /* Chart series tokens: color is never the only encoding (see
      patterns/color-encoding) — each series also gets an SVG pattern fill,
-     wired per-demo, not abstracted into svg-helpers.js. */
+     wired per-demo, not abstracted into svg-helpers.js. Category-to-series
+     mapping unchanged from before the redesign; only the hex values moved. */
   --series-1: var(--color-terracotta); /* Auto Collision */
-  --series-2: var(--color-forest); /* Weather & Storm Damage */
-  --series-3: var(--color-slate-blue); /* Water Damage (Non-Weather) */
-  --series-4: var(--color-sage); /* Liability Claims */
+  --series-2: var(--color-sage); /* Weather & Storm Damage */
+  --series-3: var(--color-teal); /* Water Damage (Non-Weather) */
+  --series-4: var(--color-steel); /* Liability Claims */
   --series-5: var(--color-plum); /* Wildlife & Unusual Incidents */
-  --series-6: var(--color-indigo); /* Theft & Vandalism (Donut/Pie Chart only) */
+  --series-6: var(--color-ochre); /* Theft & Vandalism (Donut/Pie Chart only) */
   --series-stroke: var(--color-paper); /* segment separators, light theme */
   --pattern-stroke: rgb(0 0 0 / 0.38); /* non-color segment pattern lines */
 }
 
 /* ---------- Dark theme ----------
-   --accent/--accent-contrast/--focus-ring have NO override here on
-   purpose: --color-forest already clears 4.96:1 against white (button
-   text) and 3.59:1 against --color-coal (its own visibility as a
-   boundary/ring against a dark page) -- both themes use the exact same
-   value. Only roles that are themselves text sitting on the page
-   background (--link) need the usual per-theme tint. */
+   Every series color has its own genuinely different dark-theme value
+   (from the new palette's own dark/normal block), not just a couple of
+   "-tint" overrides like the previous palette needed -- all 6 already
+   clear the 3:1 non-text minimum against --color-coal as measured (3.53
+   to 6.96:1), so no extra tint tokens are needed here at all. --accent
+   has NO override here on purpose, same reasoning as before: it clears
+   4.63:1 against white button text and 3.33:1 against the dark page
+   background either way -- only its use as decorative/text (.nav-caret)
+   against the dark *surface* specifically is tight enough to need its own
+   lightened value, see --color-accent-tint above. */
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: var(--color-coal);
     --surface: var(--color-coal-raised);
-    --text: var(--color-snow);
-    --text-muted: var(--color-snow-muted);
-    --border: var(--color-border-dark);
-    --link: var(--color-plum-tint);
-    --link-visited: var(--color-cream);
+    --text: var(--color-heading-dark);
+    --text-muted: var(--color-muted-dark);
+    --border: var(--color-hairline-dark);
+    --link: #56a5b6;
+    --link-visited: var(--color-link-visited-dark);
 
-    --series-1: var(--color-terracotta);
-    --series-2: var(--color-forest-tint);
-    --series-3: var(--color-slate-blue);
-    --series-4: var(--color-sage);
-    --series-5: var(--color-plum);
-    --series-6: var(--color-indigo-tint);
+    --series-1: #c75355;
+    --series-2: #8da28b;
+    --series-3: #1ba99d;
+    --series-4: #3f8493;
+    --series-5: #a06c7d;
+    --series-6: #c9aa70;
     --series-stroke: var(--color-coal);
   }
 }
@@ -131,34 +137,25 @@
 /* ---------- High contrast (prefers-contrast: more) ----------
    Widen the gaps: pure black/white text+background, stronger borders.
 
-   The default --series-* colors below (in the :root block above) do NOT
-   meet WCAG 1.4.11 Non-text Contrast between adjacent stacked segments --
-   measured, not assumed: series-2 vs series-3 is 1.14:1 in light mode,
-   series-4 vs series-5 2.3:1, both well under the 3:1 minimum for
-   adjacent graphical objects. That's a real, common failure mode (see
-   "Common failure patterns" below) and this demo deliberately leaves the
-   default palette showing it rather than hiding it.
+   The default --series-* colors above do NOT meet WCAG 1.4.11 Non-text
+   Contrast between adjacent segments -- measured fresh for this palette,
+   not assumed: every adjacent pair in the bar-chart stacking order (Auto
+   Collision..Weather..Water..Liability..Wildlife) sits between 1.01:1 and
+   1.43:1, all well under the 3:1 minimum for adjacent graphical objects.
+   Same real, common failure mode this site's own chart pages document
+   (see "Common failure patterns" on each), deliberately left visible in
+   the default palette rather than hidden.
 
-   These --series-* overrides are computed, not eyeballed: same hues,
-   lightness/saturation adjusted so every adjacent pair in the stack
-   (series-1..series-2..series-3..series-4..series-5) clears 3:1, with a
-   safety margin (3.4:1-3.85:1). One set works for both light and dark
-   backgrounds, so it isn't duplicated per color-scheme below.
-
-   series-6 (added for the Donut/Pie Chart) has one more constraint the
-   bar charts never hit: a donut is a ring, not a linear stack, so its
-   first and last segments are ALSO adjacent (the "wrap" pair) -- something
-   a 5-color palette designed for a non-wrapping stack was never checked
-   against. Confirmed by computing it: series-5 vs series-1 only clears
-   1.09:1 here even under this already-high-contrast palette. Rather than
-   perturb series-1..5's already-computed values (used elsewhere by the bar
-   charts), series-6 is deliberately positioned in the Donut/Pie Chart's own
-   slice order between series-5 and series-1 specifically because they're
-   both from the "light" luminance cluster (~0.24-0.28) -- inserting a
-   "dark" cluster color (~0.01, alternating with the existing light-dark-
-   light-dark-light stack) there turns that one bad wrap pair into two good
-   ones, and closes the ring to 6/6 adjacent pairs clearing 3:1 (verified,
-   min 3.42:1) without touching series-1..5 at all. */
+   These --series-* overrides are computed, not eyeballed, same method as
+   before: same 6 hues (unchanged from the default palette above), but
+   pushed to alternating light (~0.27 luminance) and dark (~0.04 luminance)
+   clusters around the ring -- Auto/Water/Wildlife light, Weather/
+   Liability/Theft dark -- so every adjacent pair, INCLUDING the donut's
+   wrap between Theft and Auto (a pair a linear bar stack never has), gets
+   high contrast for free from the alternation itself. Verified: every one
+   of the 6 ring pairs clears 3:1, minimum 3.54:1. One set works for both
+   light and dark backgrounds, so it isn't duplicated per color-scheme
+   below, same as before. */
 @media (prefers-contrast: more) {
   :root {
     --bg: #ffffff;
@@ -168,13 +165,15 @@
     --border: #000000;
     --link: #1a3d1c;
     --focus-ring: #000000;
+    --focus-ring-width: 3px;
+    --focus-ring-offset: 3px;
 
-    --series-1: #ca702f;
-    --series-2: #0f3e12;
-    --series-3: #5694d7;
-    --series-4: #383e0f;
-    --series-5: #db669f;
-    --series-6: #1f1240;
+    --series-1: #cb7678; /* Auto Collision */
+    --series-2: #1e401c; /* Weather & Storm Damage */
+    --series-3: #349d94; /* Water Damage (Non-Weather) */
+    --series-4: #1d3d44; /* Liability Claims */
+    --series-5: #f15589; /* Wildlife & Unusual Incidents */
+    --series-6: #44361d; /* Theft & Vandalism */
     --series-stroke: #000000;
     --pattern-stroke: rgb(255 255 255 / 0.7);
   }
@@ -186,7 +185,7 @@
       --text: #ffffff;
       --text-muted: #e6e6e6;
       --border: #ffffff;
-      --link: var(--color-cream);
+      --link: #94c6d1;
       --focus-ring: #ffffff;
       --series-stroke: #ffffff;
     }

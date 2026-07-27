@@ -491,11 +491,10 @@
       <li>
         <strong>Adjacent segment colors don't meet non-text contrast.</strong> Found
         while building this very demo: this chart's own default palette measures well
-        under the 3:1 minimum between neighboring stacked segments (as low as 1.14:1
-        between two of them) — even the 1px separator between segments only reaches
-        2.36:1 against one of the five colors. <code>prefers-contrast: more</code> swaps
-        in a palette computed to clear 3:1 on every adjacent pair (try it: enable
-        "increase contrast" in your OS/browser settings and reload). Left visible here
+        under the 3:1 minimum between neighboring stacked segments (as low as 1.01:1
+        between two of them). <code>prefers-contrast: more</code> swaps in a palette
+        computed to clear 3:1 on every adjacent pair (try it: enable "increase
+        contrast" in your OS/browser settings and reload). Left visible here
         deliberately rather than quietly fixed, because this is a genuinely common
         real-world failure, not a hypothetical one. (WCAG 1.4.11 Non-text Contrast)
       </li>
