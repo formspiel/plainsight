@@ -200,14 +200,31 @@ pre {
   position: relative;
 }
 
-/* display: inline, not the <summary> default of list-item -- with the
+/* inline-block, not the <summary> default of list-item -- with the
    default, a summary renders at line-height (23.56px here) while an
    inline <a> renders tight to its own glyph box (18px), so despite an
    *identical* font-size the two looked visibly different sizes next to
    each other in the nav row. Color and underline come from the global
-   summary rule above (matching .site-nav a). */
+   summary rule above (matching .site-nav a).
+
+   NOT plain `display: inline` (an earlier version of this rule): that
+   broke the summary's click-to-toggle AND keyboard (Tab/Enter/Space)
+   activation entirely in Safari, while working fine in Chrome/Firefox --
+   a known WebKit quirk where <summary>'s native disclosure behavior
+   depends on it generating a proper box, which pure `inline` doesn't
+   reliably give it. `inline-block` gives Safari that real box back, but
+   introduces its own gap: unlike a true inline run, inline-block always
+   sizes itself using its own line box (governed by line-height), so it
+   settled back at ~20px regardless of content -- line-height: 1 pulls
+   that down to ~19.8px, close enough to the link's ~18px to read as the
+   same size (down from a ~5.6px mismatch to under 2px), though not
+   pixel-identical -- a plain inline run's tight glyph-only measurement
+   isn't reachable from any box-generating display value. Not verified
+   against real Safari directly (unavailable in this environment) --
+   verify on a real device/BrowserStack before treating this as closed. */
 .site-nav summary {
-  display: inline;
+  display: inline-block;
+  line-height: 1;
   cursor: pointer;
   font-weight: 600;
   font-size: 0.95rem;
