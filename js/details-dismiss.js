@@ -27,9 +27,33 @@ export function makeDetailsDismissible(details) {
     }
   });
 
+  // Keyboard-driven dismiss: Tab/Shift+Tab moving focus somewhere
+  // genuinely outside this details element. Deliberately does NOT treat
+  // a missing relatedTarget (nextFocus falsy) as "left the details" --
+  // Safari doesn't reliably focus a plain <a> on mouse click (a real,
+  // documented difference from Chrome/Firefox), so clicking a link
+  // INSIDE this dropdown could produce a focusout with relatedTarget:
+  // null, which used to read as "focus left" and close the dropdown out
+  // from under the very click trying to follow that link -- the links
+  // were unclickable in Safari specifically because of this, not
+  // anything about the links or dropdown positioning themselves. Only
+  // close here when we positively know where focus went AND it's
+  // outside; the click-outside listener below covers the rest.
   details.addEventListener("focusout", (event) => {
     const nextFocus = event.relatedTarget;
-    if (!nextFocus || !details.contains(nextFocus)) {
+    if (nextFocus && !details.contains(nextFocus)) {
+      details.open = false;
+    }
+  });
+
+  // Pointer-driven dismiss: a real click landing outside this details
+  // element, checked by click TARGET rather than focus state -- doesn't
+  // depend on whether the clicked element did or didn't receive DOM
+  // focus, so it isn't fooled by the Safari gap above. Also naturally
+  // leaves clicks on the summary itself (toggling open/closed) alone,
+  // since the summary is inside `details`.
+  document.addEventListener("click", (event) => {
+    if (details.open && !details.contains(event.target)) {
       details.open = false;
     }
   });
