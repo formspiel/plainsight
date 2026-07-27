@@ -1,0 +1,15 @@
+# Excludes dev-only files from the Cloudflare Workers static-assets deploy
+# (wrangler.jsonc's assets.directory is the whole repo root, so without
+# this, node_modules and repo-internal docs would get uploaded and served
+# as if they were part of the site).
+node_modules/
+.git/
+.github/
+.claude/
+package.json
+package-lock.json
+.pa11yci
+.gitignore
+CLAUDE.md
+wrangler.jsonc
+.assetsignore

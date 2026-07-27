@@ -1,0 +1,11 @@
+{
+  // Static-assets-only Worker: no server-side script needed, this repo is a
+  // pure static site (see CLAUDE.md's "Build step: None"). Wrangler serves
+  // everything under "directory" as-is; see .assetsignore for what's
+  // deliberately excluded from that (dev tooling, not part of the site).
+  "name": "plainsight",
+  "compatibility_date": "2025-07-27",
+  "assets": {
+    "directory": "./"
+  }
+}
