@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Tooltips — Plainsight</title>
-  <meta name="description" content="Whether tooltips are keyboard-triggerable, persistent, and what role they should carry. Not yet built." />
+  <meta name="description" content="Whether tooltips are keyboard-triggerable, persistent, and what role they should carry — a cross-cutting pattern referenced from every chart page." />
   <link rel="icon" href="../../favicon.svg" type="image/svg+xml" />
   <link rel="icon" href="../../favicon-32.png" sizes="32x32" type="image/png" />
   <link rel="stylesheet" href="../../css/tokens.css" />
@@ -63,9 +63,209 @@
         <li><a href="" aria-current="page">Tooltips</a></li>
       </ol>
     </nav>
+
     <h1>Tooltips</h1>
-    <p class="badge">Coming soon</p>
-    <p class="page-intro">Whether tooltips are keyboard-triggerable, persistent, and what role they should carry. Not yet built.</p>
+    <p class="page-intro">
+      A small floating box of text that appears near an element on hover or focus.
+      Every chart on this site uses one — but a tooltip is a sighted-only convenience
+      layer, never the only place a value lives. This page documents the pattern once;
+      each chart page links back here instead of re-explaining it.
+    </p>
+
+    <div class="callout">
+      <p>
+        This is the first built Cross-Cutting Pattern page — a smaller template than
+        a full chart page (see <a href="../../charts/stacked-bar-chart/index.html">Stacked
+        Bar Chart</a> for that one), since a pattern here is documented once and
+        referenced from wherever it applies, rather than repeated per chart.
+      </p>
+    </div>
+
+    <h2>What a tooltip is for (and isn't)</h2>
+    <p>
+      On this site, a tooltip only ever repeats information that's already available
+      elsewhere — the hovered/focused element's own accessible name, or (for the chart
+      toolbar's icon-only buttons) its <code>aria-label</code>. It never introduces new
+      information that exists nowhere else. That's a deliberate constraint, not an
+      accident: a screen reader user already gets the full value on focus, from the
+      element itself, with no tooltip involved at all. If a tooltip carried unique
+      information, hiding it from the accessibility tree (see below) would make that
+      information invisible to AT users entirely.
+    </p>
+
+    <h2>Keyboard-triggerable</h2>
+    <p>
+      Every tooltip on this site shows on <strong>both</strong> hover and keyboard
+      focus, not hover alone — a common shortcut is to wire only
+      <code>mouseover</code>/<code>mouseout</code>, which leaves sighted keyboard users
+      with no visual confirmation of what they've navigated to, even though a screen
+      reader user gets the same information via the focused element's own name
+      regardless. Implemented with paired listeners on the same delegated handler
+      (<code>focusin</code>/<code>focusout</code> alongside
+      <code>mouseover</code>/<code>mouseout</code>) — see <code>wireTooltip</code> in
+      any chart's own <code>script.js</code>.
+    </p>
+
+    <h2>Role and accessible-tree treatment</h2>
+    <p>
+      Every tooltip element on this site is <code>aria-hidden="true"</code> and carries
+      no ARIA role at all. That's the direct consequence of the constraint above: since
+      its content always duplicates the trigger's own accessible name, exposing it a
+      second time would be redundant at best and, for a screen reader user tabbing
+      through a dense chart, actively noisy. This is different from the WAI-ARIA APG's
+      own <code>tooltip</code> role, which exists for cases where the tooltip genuinely
+      is the description (wired via <code>aria-describedby</code>) — not this site's
+      case, where the description and the tooltip are the same text shown two ways to
+      two different senses.
+    </p>
+
+    <h2>WCAG 1.4.13 Content on Hover or Focus</h2>
+    <p>
+      This success criterion applies to any content — tooltips included — that appears
+      on hover or focus and requires three things: it must be
+      <strong>dismissible</strong> without moving the pointer or focus (unless it's an
+      input error, or it doesn't obscure or replace other content), it must be
+      <strong>hoverable</strong> if pointer hover triggered it (the pointer can move
+      onto the additional content itself without it disappearing), and it must be
+      <strong>persistent</strong> until hover/focus moves away, is dismissed, or the
+      information is no longer valid.
+    </p>
+    <div class="data-table-wrapper">
+      <table>
+        <caption class="visually-hidden">How this site's tooltips measure up against WCAG 1.4.13</caption>
+        <thead>
+          <tr>
+            <th scope="col">Requirement</th>
+            <th scope="col">This site's tooltips</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">Persistent</th>
+            <td>Yes — stays visible for as long as hover or focus remains on the trigger, with no timeout.</td>
+          </tr>
+          <tr>
+            <th scope="row">Hoverable</th>
+            <td>
+              Not applicable in practice: the tooltip itself is
+              <code>pointer-events: none</code> and contains only plain text, never a
+              link or button a user would need to move the pointer onto. The
+              criterion exists to protect interactive tooltip content from
+              disappearing before it can be reached — there's nothing to reach here.
+            </td>
+          </tr>
+          <tr>
+            <th scope="row">Dismissible</th>
+            <td>
+              <strong>An honest open gap, not a solved case.</strong> There's currently
+              no way to dismiss a shown tooltip other than moving focus or the pointer
+              away from its trigger — no <kbd>Esc</kbd> handler, unlike this site's
+              popover-style disclosures (see <code>details-dismiss.js</code>). The
+              likely applicable exception ("doesn't obscure or replace other content")
+              is arguable, not clearly satisfied: the floating tooltip is positioned
+              near its trigger and can visually overlap a neighboring bar or hotspot.
+              Left here deliberately, flagged rather than silently assumed compliant —
+              exactly the kind of nuance an auditor should be checking for, not
+              something a reference site should paper over just because it built the
+              demo.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>Touch / mobile</h2>
+    <p>
+      A tap collapses hover and click into one ambiguous gesture, with no reliable
+      "the user has moved on" signal — this broke differently depending on what the
+      tooltip's trigger actually does on tap. Found and fixed on the
+      <a href="../../charts/stacked-bar-chart/index.html">Stacked Bar Chart</a>'s own
+      toolbar: a plain toggle button left its tooltip stuck visible (nothing ever fires
+      a "leave" event on touch), a button that opens a panel produced a visible flash
+      (tooltip shows on focus, then the panel-open code hides it, both in the same
+      tap), and a download link showed no tooltip at all (the page moves on before the
+      focus-triggered tooltip has anything to render).
+    </p>
+    <p>
+      The fix applied everywhere on this site: suppress the <strong>toolbar's</strong>
+      tooltip specifically under <code>(hover: none), (pointer: coarse)</code> — not
+      tooltips generally. A chart's own data-point tooltip (shown when a hotspot is
+      tapped) has no competing action to interfere with it — a hotspot's only job is to
+      be focused — so it needs no such suppression and works on touch as-is. Scoped via
+      one selector, <code>.chart-toolbar .chart-tooltip</code>, in
+      <code>chart.css</code>, rather than a blanket rule against
+      <code>.chart-tooltip</code> — the two cases genuinely don't share the same
+      problem, only the same CSS class.
+    </p>
+
+    <h2>Where this shows up on the site</h2>
+    <p>
+      Two real, different tooltip instances exist today, sharing one mechanism
+      (<code>buildTooltip</code>/<code>wireTooltip</code> in each chart's own
+      <code>script.js</code> — hand-written per chart, not imported, per this
+      project's stance on accessibility code, see CLAUDE.md):
+    </p>
+    <ul class="text-columns">
+      <li>
+        <strong>The chart's own data-point tooltip</strong> — shown on hover/focus of
+        any hotspot, clamped to stay within the visible scroll/viewport bounds rather
+        than centered blindly (see any chart's <code>buildTooltip</code>). Works
+        identically on touch.
+      </li>
+      <li>
+        <strong>The toolbar's tooltip</strong> — one shared instance for all three
+        icon-only toolbar buttons (pattern toggle, keyboard shortcuts, CSV download),
+        since their accessible names come from <code>aria-label</code> with no visible
+        text otherwise. Suppressed on touch (see above).
+      </li>
+    </ul>
+    <p>
+      See <a href="../../charts/stacked-bar-chart/index.html">Stacked Bar Chart</a>,
+      <a href="../../charts/double-bar-chart/index.html">Double Bar Graph</a>, or
+      <a href="../../charts/donut-pie-chart/index.html">Donut / Pie Chart</a> for the
+      actual code — this page documents the pattern, not a third copy of it.
+    </p>
+
+    <h2>Common failure patterns seen in audits</h2>
+    <p>
+      Seeded with well-known, representative failures to start this page — not yet a
+      team-sourced catalog from real audits. Replace/extend as the team encounters
+      real examples (see CLAUDE.md's sourcing note).
+    </p>
+    <ul class="text-columns">
+      <li>
+        <strong>Hover-only, no keyboard trigger.</strong> The most common tooltip
+        failure by far: wired to <code>mouseenter</code>/<code>mouseleave</code> alone,
+        so a sighted keyboard user tabbing through gets no visual value at all, even
+        when the underlying data is technically reachable by a screen reader via the
+        element's own accessible name. (WCAG 2.1.1 Keyboard)
+      </li>
+      <li>
+        <strong>The tooltip is the ONLY place a value lives</strong> — no accessible
+        name, no data table, nothing else exposes it. A screen reader user gets
+        nothing; a sighted mouse user gets everything. This is the specific trap this
+        site's own "duplicate, never originate" rule (see above) exists to avoid.
+        (WCAG 1.1.1 Non-text Content, 4.1.2 Name, Role, Value)
+      </li>
+      <li>
+        <strong>Exposed to the accessibility tree AND duplicating the trigger's own
+        name</strong> — e.g. a tooltip with <code>role="tooltip"</code> and no
+        <code>aria-hidden</code>, read out in addition to the element's own accessible
+        name. Not incorrect exactly, but redundant enough in a dense chart (30+ stops)
+        to actively degrade the experience it's trying to help.
+      </li>
+      <li>
+        <strong>Left running unmodified on touch</strong> — see "Touch / mobile"
+        above for the three distinct ways this broke on this site's own first pass,
+        before the fix.
+      </li>
+      <li>
+        <strong>No dismiss mechanism other than moving away</strong> — this site's own
+        current, honestly-flagged gap (see the WCAG 1.4.13 table above). Worth checking
+        for specifically on any tooltip whose content could plausibly obscure something
+        the user needs to see underneath it.
+      </li>
+    </ul>
   </main>
 
   <footer class="site-footer">

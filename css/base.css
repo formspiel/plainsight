@@ -446,6 +446,24 @@ th[scope="row"] {
   background: var(--surface);
 }
 
+/* ---------- TEMPORARY: built-page indicator ----------
+   Marks nav links to pages that already have real content, so it's easy
+   to spot what's built vs. still a stub while browsing. One block, keyed
+   entirely by href suffix (matches regardless of a page's own "../../"
+   relative-path depth) rather than per-page markup -- so removing this
+   feature later, once every v1 page is built, is one deletion here, not
+   an edit across 18 files. Delete this whole block (and drop this
+   sentence + the matching hrefs list below when adding new built pages
+   in the meantime) once CLAUDE.md's Status section says v1 is complete. */
+.site-nav a[href$="charts/stacked-bar-chart/index.html"]::after,
+.site-nav a[href$="charts/double-bar-chart/index.html"]::after,
+.site-nav a[href$="charts/donut-pie-chart/index.html"]::after,
+.site-nav a[href$="patterns/tooltips/index.html"]::after {
+  content: " \2713";
+  color: var(--accent);
+  font-weight: 700;
+}
+
 /* ---------- Footer ---------- */
 .site-footer {
   border-top: 1px solid var(--border);
