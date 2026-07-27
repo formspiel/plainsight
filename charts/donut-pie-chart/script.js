@@ -33,15 +33,22 @@
      stop, matching the Double Bar Graph's flatter keyboard model more
      than the Stacked Bar Chart's.
 
-  4. Legend-driven hiding recomputes every visible slice's angle from
-     scratch (the remaining slices expand to fill the freed-up 360°) --
-     the same "re-stack" idiom the Stacked Bar Chart uses for its
-     segment totals, applied to angle instead of height.
+  4. Legend-driven hiding does NOT re-normalize the remaining slices to
+     fill 360° the way the bar charts re-stack around a hidden series.
+     A donut/pie's whole visual promise is "this circle is the whole" --
+     re-filling it after removing a category would make the remaining
+     slices silently claim a NEW, smaller whole, with no visual signal
+     that anything changed. A reader glancing at a still-complete circle
+     has no way to tell it no longer represents all 600 claims. Instead,
+     every slice's angle is a fixed fact about the real, original total,
+     computed once and never recomputed -- hiding a category just leaves
+     a real, proportional gap where it was. See computeAllSlices and
+     buildCenterLabel below, and "Legend as a filter" on this page.
 */
 
 import { linearScale, donutArcPath } from "../../js/svg-helpers.js";
 import { makeDetailsDismissible } from "../../js/details-dismiss.js";
-import { donutData, seriesColors } from "./data.js";
+import { donutData, seriesColors, TOTAL_CLAIMS } from "./data.js";
 
 const SVG_NS = "http://www.w3.org/2000/svg";
 const VIEWBOX_SIZE = 500;
@@ -59,28 +66,34 @@ const PATTERN_KINDS = ["diagonal", "dots", "crosshatch", "horizontal", "vertical
 
 let hiddenKeys = new Set();
 
-function visibleData() {
-  return donutData.filter((d) => !hiddenKeys.has(d.key));
-}
-
-// Recomputes every visible slice's start/end angle from scratch, in data
-// order, clockwise from 12 o'clock (angle 0). A hidden category is simply
-// absent from this list -- the remaining slices' angles expand to close
-// the gap, the same "re-stack" idiom the Stacked Bar Chart applies to bar
-// height, applied here to angle instead.
-function computeSlices() {
-  const visible = visibleData();
-  const total = visible.reduce((sum, d) => sum + d.value, 0);
+// Computed ONCE, from the full dataset, in data order, clockwise from 12
+// o'clock (angle 0) -- every slice's angle is a fixed fact about the real
+// total (TOTAL_CLAIMS), never recomputed when the legend hides a
+// category. See the file header comment for why: unlike the bar charts'
+// "re-stack," re-normalizing a part-to-whole ring after removing a slice
+// would make the remaining slices silently claim a new, smaller whole.
+function computeAllSlices() {
   let angle = 0;
-  return visible.map((d) => {
+  return donutData.map((d) => {
     const startAngle = angle;
-    const sweep = (d.value / total) * Math.PI * 2;
+    const sweep = (d.value / TOTAL_CLAIMS) * Math.PI * 2;
     angle += sweep;
-    return { ...d, startAngle, endAngle: angle, total };
+    return { ...d, startAngle, endAngle: angle };
   });
 }
 
-let slices = computeSlices();
+const allSlices = computeAllSlices();
+
+// The currently-visible subset of allSlices, in the same fixed order --
+// this is what every render/keyboard-nav function below actually walks.
+// Hiding a category removes it from this list (so its wedge and hotspot
+// simply aren't drawn -- see buildSlices/populateHotspots) without
+// touching any other slice's angle at all.
+function visibleSlices() {
+  return allSlices.filter((s) => !hiddenKeys.has(s.key));
+}
+
+let slices = visibleSlices();
 
 function svgEl(name, attrs = {}) {
   const el = document.createElementNS(SVG_NS, name);
@@ -174,7 +187,7 @@ function buildSlices() {
     // overlapping text.
     const sweep = slice.endAngle - slice.startAngle;
     if (sweep >= MIN_LABEL_ANGLE) {
-      const pct = Math.round((slice.value / slice.total) * 100);
+      const pct = Math.round((slice.value / TOTAL_CLAIMS) * 100);
       const mid = slice.startAngle + sweep / 2;
       const [lx, ly] = midpoint(LABEL_RADIUS, mid);
       const label = svgEl("text", {
@@ -194,7 +207,8 @@ function buildSlices() {
 
 function buildCenterLabel() {
   const group = svgEl("g", { class: "chart-donut-center", "aria-hidden": "true" });
-  const total = slices.reduce((sum, s) => sum + s.value, 0);
+  const visibleTotal = slices.reduce((sum, s) => sum + s.value, 0);
+  const isPartial = visibleTotal !== TOTAL_CLAIMS;
 
   const totalText = svgEl("text", {
     x: CENTER,
@@ -202,7 +216,7 @@ function buildCenterLabel() {
     class: "chart-donut-center__total",
     "text-anchor": "middle",
   });
-  totalText.textContent = String(total);
+  totalText.textContent = String(visibleTotal);
 
   const labelText = svgEl("text", {
     x: CENTER,
@@ -210,7 +224,11 @@ function buildCenterLabel() {
     class: "chart-donut-center__label",
     "text-anchor": "middle",
   });
-  labelText.textContent = "total claims";
+  // "of 600 shown" once something's hidden, not a silent "548 total
+  // claims" -- the number in the middle of an otherwise-normal-looking
+  // ring needs to say out loud that it's a subset, not the real total,
+  // or it reads as just as authoritative as when nothing's hidden.
+  labelText.textContent = isPartial ? `of ${TOTAL_CLAIMS} shown` : "total claims";
 
   group.append(totalText, labelText);
   return group;
@@ -242,8 +260,8 @@ function updateChart(svg) {
 // ---------------------------------------------------------------------
 
 function sliceDescription(slice) {
-  const pct = Math.round((slice.value / slice.total) * 100);
-  return `${slice.name}: ${slice.value} claims, ${pct}% of ${slice.total} total claims.`;
+  const pct = Math.round((slice.value / TOTAL_CLAIMS) * 100);
+  return `${slice.name}: ${slice.value} claims, ${pct}% of ${TOTAL_CLAIMS} total claims.`;
 }
 
 function buildHotspot(slice) {
@@ -408,9 +426,17 @@ function buildTooltip(container, scrollBoundsEl) {
 
   const EDGE_MARGIN = 8;
 
-  function show(target) {
+  // anchorRect, not target -- see wireTooltip's getAnchorRect param below.
+  // For a plain rectangular hotspot (or the toolbar's own buttons),
+  // target.getBoundingClientRect() IS the anchor. It is NOT for a donut
+  // hotspot: that button's own DOM box covers the entire chart (clip-path
+  // only restricts paint/hit-testing, not layout geometry -- see
+  // .hotspot--donut in chart.css), so using it here would anchor every
+  // slice's tooltip to the same point regardless of which wedge is
+  // actually hovered.
+  function show(target, anchorRect) {
     const containerRect = container.getBoundingClientRect();
-    const targetRect = target.getBoundingClientRect();
+    const targetRect = anchorRect || target.getBoundingClientRect();
 
     tooltip.textContent = target.dataset.tooltip;
     tooltip.hidden = false;
@@ -435,7 +461,15 @@ function buildTooltip(container, scrollBoundsEl) {
     );
 
     const showBelow = anchorTop < tooltipHeight + EDGE_MARGIN * 2;
-    const top = showBelow ? anchorBottom + 10 : anchorTop - tooltipHeight - 10;
+    let top = showBelow ? anchorBottom + 10 : anchorTop - tooltipHeight - 10;
+    // Vertical clamp against the container's own bounds -- this chart has
+    // no scroll wrapper, and its legend sits directly below with little
+    // margin, so an unclamped tooltip near the ring's bottom edge could
+    // otherwise render over the legend instead of staying inside the
+    // chart canvas.
+    const visibleBottom = containerRect.height;
+    const maxTop = Math.max(EDGE_MARGIN, visibleBottom - tooltipHeight - EDGE_MARGIN);
+    top = Math.min(Math.max(top, EDGE_MARGIN), maxTop);
 
     tooltip.style.left = `${left}px`;
     tooltip.style.top = `${top}px`;
@@ -448,13 +482,17 @@ function buildTooltip(container, scrollBoundsEl) {
   return { show, hide };
 }
 
-function wireTooltip(layer, tooltip, selector = ".hotspot") {
+// getAnchorRect, if given, computes the tooltip's screen-space anchor
+// point independently of the target's own getBoundingClientRect() -- see
+// buildTooltip's own comment on `show` for why the donut chart needs
+// this and the bar charts never did.
+function wireTooltip(layer, tooltip, selector = ".hotspot", getAnchorRect) {
   function handleEnter(event) {
     const target = event.target.closest(selector);
     if (!target) return;
     const ownerDetails = target.closest("details");
     if (ownerDetails && ownerDetails.open && target.tagName === "SUMMARY") return;
-    tooltip.show(target);
+    tooltip.show(target, getAnchorRect?.(target));
   }
 
   function handleLeave(event) {
@@ -468,6 +506,28 @@ function wireTooltip(layer, tooltip, selector = ".hotspot") {
   layer.addEventListener("mouseout", handleLeave);
   layer.addEventListener("focusin", handleEnter);
   layer.addEventListener("focusout", handleLeave);
+}
+
+// Computes a zero-size anchor "rect" at a donut hotspot's actual visual
+// midpoint (same angle/radius the percentage label is drawn at), in
+// screen coordinates -- converts from the fixed 500x500 viewBox-unit
+// space via the canvas's own current rendered size, the same uniform
+// scale factor .chart-hotspots--donut's CSS transform already uses (see
+// chart.css), just computed in JS here since this needs an actual number,
+// not a CSS expression.
+function donutAnchorRect(chartCanvas) {
+  return (target) => {
+    const key = target.dataset.sliceKey;
+    const slice = allSlices.find((s) => s.key === key);
+    if (!slice) return undefined;
+    const mid = slice.startAngle + (slice.endAngle - slice.startAngle) / 2;
+    const [x, y] = midpoint(LABEL_RADIUS, mid);
+    const canvasRect = chartCanvas.getBoundingClientRect();
+    const scale = canvasRect.width / VIEWBOX_SIZE;
+    const left = canvasRect.left + x * scale;
+    const top = canvasRect.top + y * scale;
+    return { left, right: left, top, bottom: top, width: 0, height: 0 };
+  };
 }
 
 // ---------------------------------------------------------------------
@@ -518,11 +578,14 @@ function wireKeyboardPanel(details, demoRoot, toolbarTooltip) {
 }
 
 // ---------------------------------------------------------------------
-// Legend as an interactive filter -- same idiom as the bar charts'
-// (aria-pressed toggle buttons, a live-region announcement, the last-
-// visible category locked via aria-disabled), applied to angle instead
-// of stack height or bar presence: hiding a category recomputes every
-// remaining slice's angle so they expand to fill the freed-up 360°.
+// Legend as an interactive filter -- same aria-pressed/live-region/
+// aria-disabled-last-one idiom as the bar charts, but NOT the same
+// "re-stack" effect: hiding a category here does not touch any other
+// slice's angle. It only removes that one slice (and its hotspot) from
+// what's drawn, leaving a real, proportional gap in the ring -- see the
+// file header comment and buildCenterLabel above for why re-normalizing
+// a part-to-whole chart back to a full circle would be actively
+// misleading, not just a cosmetic difference from the bar charts.
 // ---------------------------------------------------------------------
 
 function renderLegend(container) {
@@ -578,14 +641,18 @@ function wireLegendToggling({ legendList, svg, hotspotLayer, keyboardNav, status
     if (wasVisible) hiddenKeys.add(key);
     else hiddenKeys.delete(key);
 
-    slices = computeSlices();
+    slices = visibleSlices();
     updateChart(svg);
     populateHotspots(hotspotLayer);
     keyboardNav.restoreAfterRebuild();
     refreshButtonStates();
 
     if (statusRegion) {
-      statusRegion.textContent = `${name} ${wasVisible ? "hidden" : "shown"}.`;
+      const entry = donutData.find((d) => d.key === key);
+      const pct = Math.round((entry.value / TOTAL_CLAIMS) * 100);
+      statusRegion.textContent = wasVisible
+        ? `${name} hidden. The ring now has a gap where it was — ${entry.value} of ${TOTAL_CLAIMS} total claims (${pct}%) not shown.`
+        : `${name} shown again.`;
     }
   }
 
@@ -681,7 +748,7 @@ document.addEventListener("DOMContentLoaded", () => {
     hotspotLayer = buildHotspotLayer(chartCanvas);
     keyboardNav = wireKeyboardNav(hotspotLayer);
     const tooltip = buildTooltip(chartCanvas);
-    wireTooltip(hotspotLayer, tooltip);
+    wireTooltip(hotspotLayer, tooltip, ".hotspot", donutAnchorRect(chartCanvas));
     wireSegmentHighlight(hotspotLayer, svg);
   }
 

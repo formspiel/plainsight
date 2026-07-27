@@ -263,7 +263,7 @@
             <td>Center total label</td>
             <td><code>aria-hidden="true"</code> — not in the tree</td>
             <td>n/a</td>
-            <td>n/a — the total is already spoken as part of every category stop's own name above; this is a sighted-only summary, not a second source of that number</td>
+            <td>n/a — the real total (600) is already spoken as part of every category stop's own name above, so this is a sighted-only summary, not a second source of that number. When a category is hidden it switches to "N of 600 shown," a sighted-only echo of what the legend's own live-region announcement already says in words (see "Legend as a filter" below) — not the only place that fact is exposed</td>
           </tr>
           <tr>
             <td>Percentage label on each wedge</td>
@@ -336,20 +336,30 @@
 
     <h2>Legend as a filter</h2>
     <p>
-      Same idiom as both bar charts (see the
+      <strong>Deliberately NOT the same effect as either bar chart's legend</strong>,
+      even though the toggle mechanics (<code>aria-pressed</code> buttons, a
+      live-region announcement, the one remaining category locked via
+      <code>aria-disabled</code>) are identical — see the
       <a href="../../charts/stacked-bar-chart/index.html">Stacked Bar Chart</a>'s own
-      "Legend as a filter" for the fuller rationale), applied to angle instead of bar
-      height: hiding a category recomputes every remaining wedge's angle from
-      scratch, so they expand to fill the freed-up 360° — the same "re-stack" idea,
-      just around a ring instead of up a column. The hidden category's wedge and
-      hotspot are removed from the DOM entirely, the center total updates to match
-      what's actually shown, and the one category remaining visible (if everything
-      else is hidden) can't be turned off, locked via <code>aria-disabled</code>
-      rather than disappearing from the tab order. The data table fallback is
-      deliberately <strong>not</strong> affected by this filter, same as both bar
-      charts. This is one implementation of the general
+      "Legend as a filter" for that shared part. A stacked bar can safely
+      re-normalize when a series is hidden: the bar's total visibly shrinks, so a
+      reader can see it's now showing less than before. A donut/pie can't do that
+      safely — its whole visual promise is "this circle is the whole" — so
+      re-filling the ring back to a complete 360° after removing a category would
+      make the remaining wedges silently claim a <em>new, smaller</em> whole, with
+      nothing to tell a reader that anything changed. Hiding a category here instead
+      leaves a real, proportional gap in the ring where it was: every remaining
+      wedge keeps its <em>original</em> angle and percentage (computed against the
+      full, real total, always 600 — never against whatever's currently visible),
+      and the center label switches from "600 total claims" to "548 of 600 shown"
+      to say out loud that what's left is a subset, not silently keep looking like a
+      complete answer. The hidden category's wedge and hotspot are still removed
+      from the DOM entirely, and the data table fallback is deliberately
+      <strong>not</strong> affected by this filter, same as both bar charts. This is
+      one implementation of the general
       <a href="../../patterns/legends-as-filters/index.html">Legends as Filters</a>
-      cross-cutting pattern.
+      cross-cutting pattern — and a concrete example of why that pattern needs
+      chart-type-specific judgment, not one universal effect.
     </p>
 
     <h2>Screen reader behavior</h2>
@@ -421,6 +431,26 @@
       real examples (see CLAUDE.md's sourcing note).
     </p>
     <ul class="text-columns">
+      <li>
+        <strong>Re-normalizing a part-to-whole chart back to 100% after hiding a
+        category.</strong> Found — and caught during review, not shipped — on this
+        very demo: an interactive legend that hides a category is a genuinely useful
+        pattern (see "Legend as a filter" below), but this chart's first version
+        copied the Stacked Bar Chart's "re-stack" behavior literally, recomputing
+        every remaining wedge's angle to fill the freed-up 360°. That's safe for a
+        bar (its total visibly shrinks, so a reader can see less is being shown) but
+        actively misleading for a donut/pie: the ring still looked like a complete,
+        untouched whole, silently redefining "100%" to mean "100% of whatever's left
+        visible" with no visual signal that anything had changed. Fixed by leaving a
+        real, proportional gap instead — every wedge keeps its original angle and
+        percentage of the true, fixed total regardless of what else is hidden (see
+        "Legend as a filter" below). Worth checking for specifically any time a
+        part-to-whole chart lets categories be toggled off: does the chart still
+        honestly look partial, or does it quietly become "the new whole"? (Not a
+        single WCAG SC — this is a data-accuracy/misleading-visualization problem,
+        not an access barrier, but exactly the kind of thing this project exists to
+        catch before it ships.)
+      </li>
       <li>
         <strong>A rectangular (or worse, invisible-centroid-dot) hit target for a
         wedge-shaped slice.</strong> A plain rectangle sized to a wedge's bounding box
