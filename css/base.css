@@ -38,8 +38,7 @@ body {
   margin: 0;
   background: var(--bg);
   color: var(--text);
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial,
-    sans-serif;
+  font-family: var(--font-body);
   line-height: 1.55;
 }
 
@@ -48,14 +47,16 @@ main {
 }
 
 /* Headings only, not body text (see body's own font-family above) --
-   Fraunces as a display/heading face, system stack as the fallback if
-   the self-hosted file fails to load for any reason (font-display: swap
-   means text is never invisible while waiting either way). */
+   var(--font-heading) resolves to Fraunces with a Georgia/serif fallback
+   (see tokens.css), so the self-hosted file failing to load for any
+   reason still lands on a serif, not a mismatched sans-serif
+   (font-display: swap means text is never invisible while waiting either
+   way). */
 h1,
 h2,
 h3,
 h4 {
-  font-family: "Fraunces", Georgia, serif;
+  font-family: var(--font-heading);
   font-weight: 700;
   line-height: 1.2;
   color: var(--text);
@@ -160,7 +161,7 @@ pre {
   background: var(--accent);
   color: var(--accent-contrast);
   padding: 0.5rem 1rem;
-  border-radius: 4px;
+  border-radius: var(--radius);
   text-decoration: none;
   transition: top 0.15s ease;
 }
@@ -386,7 +387,7 @@ pre {
   background: var(--surface);
   border: 1px solid var(--border);
   border-left: 4px solid var(--accent);
-  border-radius: 4px;
+  border-radius: var(--radius);
   padding: 1rem 1.25rem;
   margin: 1.5rem 0;
 }
@@ -411,7 +412,7 @@ pre {
   height: 100%;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: var(--radius);
   padding: 1rem 1.25rem;
   text-decoration: none;
   color: var(--text);

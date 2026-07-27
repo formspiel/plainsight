@@ -216,7 +216,7 @@
   background: var(--surface);
   color: var(--text);
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: var(--radius);
   width: 2.5rem;
   height: 2.5rem;
   padding: 0;
@@ -263,7 +263,7 @@ button.toolbar-btn[aria-pressed="true"] {
   overflow-x: auto;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: var(--radius);
   padding: 0.75rem 0.9rem;
   box-shadow: 0 4px 12px rgb(0 0 0 / 0.15);
 }

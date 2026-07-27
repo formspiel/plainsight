@@ -72,6 +72,20 @@
      --color-plum-tint did for the previous palette, recomputed for the
      new plum hue). */
   --color-plum-tint: #af8392;
+
+  /* ---- Named font tokens -- restored after being dropped in an earlier
+     pass of this redesign, where the heading font ended up hardcoded
+     directly into base.css's h1-h4 rule instead of living here as a
+     swappable token. Theme-independent (fonts don't change with
+     light/dark/contrast), unlike everything below this point. ---- */
+  --font-heading: "Fraunces", Georgia, serif;
+  --font-body: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif;
+
+  /* One shared corner radius, applied consistently across cards/buttons/
+     callouts/etc. in base.css and chart.css, instead of each component
+     picking its own ad hoc 4px/6px/8px. */
+  --radius: 8px;
 }
 
 /* ---------- Light theme (default) ---------- */
@@ -101,6 +115,25 @@
   --series-6: var(--color-ochre); /* Theft & Vandalism (Donut/Pie Chart only) */
   --series-stroke: var(--color-paper); /* segment separators, light theme */
   --pattern-stroke: rgb(0 0 0 / 0.38); /* non-color segment pattern lines */
+
+  /* ---- Shared roles, not yet used by any Plainsight UI ----
+     This token file is shared with native-form-elements (see file header);
+     these carry the source design's values straight through for that
+     project's own use (e.g. field-level error/success messaging) and for
+     future Plainsight UI that needs them, rather than being left out just
+     because nothing on this site currently has a delete button or a form
+     validation state. */
+  --terracotta-bg: var(--color-terracotta);
+  --terracotta-text: #ffffff;
+  --secondary-border: var(--color-sage);
+  --error: #a92d42;
+  --error-text: #ffffff;
+  --warning: #986813;
+  --warning-text: #ffffff;
+  --success: #2f7444;
+  --success-text: #ffffff;
+  --info: #356997;
+  --info-text: #ffffff;
 }
 
 /* ---------- Dark theme ----------
@@ -131,6 +164,18 @@
     --series-5: #a06c7d;
     --series-6: #c9aa70;
     --series-stroke: var(--color-coal);
+
+    --terracotta-bg: #c75355;
+    --terracotta-text: #000000;
+    --secondary-border: #8da28b;
+    --error: #d7697b;
+    --error-text: #000000;
+    --warning: #da941b;
+    --warning-text: #000000;
+    --success: #3f9d5c;
+    --success-text: #000000;
+    --info: #5590c3;
+    --info-text: #000000;
   }
 }
 
@@ -176,6 +221,18 @@
     --series-6: #44361d; /* Theft & Vandalism */
     --series-stroke: #000000;
     --pattern-stroke: rgb(255 255 255 / 0.7);
+
+    --terracotta-bg: #9e3436;
+    --terracotta-text: #ffffff;
+    --secondary-border: #4f5c4c;
+    --error: #a32b40;
+    --error-text: #ffffff;
+    --warning: #78510f;
+    --warning-text: #ffffff;
+    --success: #29643b;
+    --success-text: #ffffff;
+    --info: #2f5c85;
+    --info-text: #ffffff;
   }
 
   @media (prefers-color-scheme: dark) {
@@ -188,6 +245,18 @@
       --link: #94c6d1;
       --focus-ring: #ffffff;
       --series-stroke: #ffffff;
+
+      --terracotta-bg: #d57d7e;
+      --terracotta-text: #000000;
+      --secondary-border: #9f9574;
+      --error: #db7788;
+      --error-text: #000000;
+      --warning: #da941b;
+      --warning-text: #000000;
+      --success: #44a862;
+      --success-text: #000000;
+      --info: #649ac9;
+      --info-text: #000000;
     }
   }
 }
